@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone.
 // file.php
 // Copyright
-//   2002-2017 PukiWiki Development Team
+//   2002-2020 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -104,6 +104,8 @@ function get_filename($page)
 // Put a data(wiki text) into a physical file(diff, backup, text)
 function page_write($page, $postdata, $notimestamp = FALSE)
 {
+	global $autoalias, $aliaspage;
+
 	if (PKWK_READONLY) return; // Do nothing
 
 	$postdata = make_str_rules($postdata);
@@ -133,6 +135,18 @@ function page_write($page, $postdata, $notimestamp = FALSE)
 	file_write(DATA_DIR, $page, $postdata, $notimestamp, $is_delete);
 
 	links_update($page);
+
+	// for AutoAlias
+	if ($autoalias>0 && $page==$aliaspage) {
+		// AutoAliasName is updated
+		$pages = array_keys(get_autoaliases());
+		if(count($pages)>0) {
+			autolink_pattern_write(CACHE_DIR . 'autoalias.dat',
+				get_autolink_pattern($pages, $autoalias));
+		} else {
+			@unlink(CACHE_DIR . 'autoalias.dat');
+		}
+	}
 }
 
 // Modify original text with user-defined / system-defined rules
@@ -602,23 +616,9 @@ function put_lastmodified()
 	fclose($fp);
 
 	// For AutoLink
-	if ($autolink) {
-		list($pattern, $pattern_a, $forceignorelist) =
-			get_autolink_pattern($pages);
-
-		$file = CACHE_DIR . PKWK_AUTOLINK_REGEX_CACHE;
-		pkwk_touch_file($file);
-		$fp = fopen($file, 'r+') or
-			die_message('Cannot open ' . 'CACHE_DIR/' . PKWK_AUTOLINK_REGEX_CACHE);
-		set_file_buffer($fp, 0);
-		flock($fp, LOCK_EX);
-		ftruncate($fp, 0);
-		rewind($fp);
-		fputs($fp, $pattern   . "\n");
-		fputs($fp, $pattern_a . "\n");
-		fputs($fp, join("\t", $forceignorelist) . "\n");
-		flock($fp, LOCK_UN);
-		fclose($fp);
+	if ($autolink){
+		autolink_pattern_write(CACHE_DIR . PKWK_AUTOLINK_REGEX_CACHE,
+			get_autolink_pattern($pages, $autolink));
 	}
 }
 
@@ -646,6 +646,23 @@ function get_recent_files()
 function delete_recent_changes_cache() {
 	$file = CACHE_DIR . PKWK_MAXSHOW_CACHE;
 	unlink($file);
+}
+
+// update autolink data
+function autolink_pattern_write($filename, $autolink_pattern)
+{
+	list($pattern, $pattern_a, $forceignorelist) = $autolink_pattern;
+
+	$fp = fopen($filename, 'w') or
+			die_message('Cannot open ' . $filename);
+	set_file_buffer($fp, 0);
+	flock($fp, LOCK_EX);
+	rewind($fp);
+	fputs($fp, $pattern   . "\n");
+	fputs($fp, $pattern_a . "\n");
+	fputs($fp, join("\t", $forceignorelist) . "\n");
+	flock($fp, LOCK_UN);
+	fclose($fp);
 }
 
 // Get elapsed date of the page

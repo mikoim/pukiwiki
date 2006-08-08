@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone.
 // func.php
 // Copyright
-//   2002-2019 PukiWiki Development Team
+//   2002-2020 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -723,7 +723,7 @@ function drop_submit($str)
 }
 
 // Generate AutoLink patterns (thx to hirofummy)
-function get_autolink_pattern(& $pages)
+function get_autolink_pattern(& $pages, $min_len = -1)
 {
 	global $WikiName, $autolink, $nowikiname;
 
@@ -734,9 +734,13 @@ function get_autolink_pattern(& $pages)
 	unset($config);
 	$auto_pages = array_merge($ignorepages, $forceignorepages);
 
+	if ($min_len == -1) {
+		$min_len = $autolink;	// set $autolink, when omitted.
+	}
+
 	foreach ($pages as $page)
 		if (preg_match('/^' . $WikiName . '$/', $page) ?
-		    $nowikiname : strlen($page) >= $autolink)
+		    $nowikiname : strlen($page) >= $min_len)
 			$auto_pages[] = $page;
 
 	if (empty($auto_pages)) {
@@ -781,6 +785,32 @@ function get_autolink_pattern_sub(& $pages, $start, $end, $pos)
 	if ($x)               $result .= '?';
 
 	return $result;
+}
+
+// get pagelist for AutoAlias
+function get_autoaliases()
+{
+	global $aliaspage, $autoalias_max_words;
+
+	$pages = array();
+	$pattern = <<<EOD
+\[\[                # open bracket
+((?:(?!\]\]).)+)>   # (1) alias name
+((?:(?!\]\]).)+)    # (2) alias link
+\]\]                # close bracket
+EOD;
+
+	$postdata = join('', get_source($aliaspage));
+	$matches = array();
+	if(preg_match_all("/$pattern/x", $postdata, $matches, PREG_SET_ORDER)) {
+		foreach($matches as $match) {
+			$pages[$match[1]] = trim($match[2]);
+		}
+	}
+	// fail safe
+	$pages = array_slice($pages, 0, $autoalias_max_words);
+
+	return $pages;
 }
 
 /**
