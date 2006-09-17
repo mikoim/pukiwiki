@@ -826,7 +826,7 @@ class Link_autoalias extends Link
 		$aliases = get_autoaliases();
 		$result = '';
 		if (isset($aliases[$name])) {
-			$result = $aliases[$this->name];
+			$result = $aliases[$name];
 		}
 		return $result;
 	}
