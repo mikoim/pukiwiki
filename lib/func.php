@@ -787,12 +787,15 @@ function get_autolink_pattern_sub(& $pages, $start, $end, $pos)
 	return $result;
 }
 
-// get pagelist for AutoAlias
+// Load/get setting pairs from AutoAliasName
 function get_autoaliases()
 {
 	global $aliaspage, $autoalias_max_words;
+	static $pairs;
 
-	$pages = array();
+	if (isset($pairs)) return $pairs;
+
+	$pairs = array();
 	$pattern = <<<EOD
 \[\[                # open bracket
 ((?:(?!\]\]).)+)>   # (1) alias name
@@ -801,16 +804,22 @@ function get_autoaliases()
 EOD;
 
 	$postdata = join('', get_source($aliaspage));
-	$matches = array();
-	if(preg_match_all("/$pattern/x", $postdata, $matches, PREG_SET_ORDER)) {
-		foreach($matches as $match) {
-			$pages[$match[1]] = trim($match[2]);
+	$matches  = array();
+	$count = 0;
+	$max   = max($autoalias_max_words, 0);
+	if (preg_match_all('/' . $pattern . '/x', $postdata, $matches, PREG_SET_ORDER)) {
+		foreach($matches as $key => $value) {
+			if ($count ==  $max) break;
+			$name = trim($value[1]);
+			if (! isset($pairs[$name])) {
+				++$count;
+				 $pairs[$name] = trim($value[2]);
+			}
+			unset($matches[$key]);
 		}
 	}
-	// fail safe
-	$pages = array_slice($pages, 0, $autoalias_max_words);
 
-	return $pages;
+	return $pairs;
 }
 
 /**
