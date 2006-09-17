@@ -15,6 +15,9 @@ define('PKWK_MAXSHOW_CACHE', 'recent.dat');
 // AutoLink
 define('PKWK_AUTOLINK_REGEX_CACHE', 'autolink.dat');
 
+// AutoAlias
+define('PKWK_AUTOALIAS_CACHE', 'autoalias.dat');
+
 /**
  * Get source(wiki text) data of the page
  *
@@ -104,7 +107,7 @@ function get_filename($page)
 // Put a data(wiki text) into a physical file(diff, backup, text)
 function page_write($page, $postdata, $notimestamp = FALSE)
 {
-	global $autoalias, $aliaspage;
+	global $trackback, $autoalias, $aliaspage;
 
 	if (PKWK_READONLY) return; // Do nothing
 
@@ -136,15 +139,16 @@ function page_write($page, $postdata, $notimestamp = FALSE)
 
 	links_update($page);
 
-	// for AutoAlias
-	if ($autoalias>0 && $page==$aliaspage) {
-		// AutoAliasName is updated
-		$pages = array_keys(get_autoaliases());
-		if(count($pages)>0) {
-			autolink_pattern_write(CACHE_DIR . 'autoalias.dat',
-				get_autolink_pattern($pages, $autoalias));
+	// Update autoalias.dat (AutoAliasName)
+	if ($autoalias && $page == $aliaspage) {
+		$aliases = get_autoaliases();
+		if (empty($aliases)) {
+			// Remove
+			@unlink(CACHE_DIR . PKWK_AUTOALIAS_CACHE);
 		} else {
-			@unlink(CACHE_DIR . 'autoalias.dat');
+			// Create or Update
+			autolink_pattern_write(CACHE_DIR . PKWK_AUTOALIAS_CACHE,
+				get_autolink_pattern(array_keys($aliases), $autoalias));
 		}
 	}
 }
