@@ -782,11 +782,12 @@ class Link_autoalias extends Link
 
 		parent::Link($start);
 
-		if (!$autoalias || !file_exists(CACHE_DIR.'autoalias.dat') || $this->page==$aliaspage)
+		if (! $autoalias || ! file_exists(CACHE_DIR . PKWK_AUTOALIAS_REGEX_CACHE) || $this->page == $aliaspage)
 		{
 			return;
 		}
-		@list($auto,$auto_a,$forceignorepages) = file(CACHE_DIR.'autoalias.dat');
+
+		@list($auto, $auto_a, $forceignorepages) = file(CACHE_DIR . PKWK_AUTOALIAS_REGEX_CACHE);
 		$this->auto = $auto;
 		$this->auto_a = $auto_a;
 		$this->forceignorepages = explode("\t", trim($forceignorepages));
@@ -822,13 +823,9 @@ class Link_autoalias extends Link
 
 	function get_alias($name)
 	{
-		static $aliases;
-
-		if (!isset($aliases)) {
-			$aliases = get_autoaliases();
-		}
+		$aliases = get_autoaliases();
 		$result = '';
-		if (array_key_exists($name, $aliases)) {
+		if (isset($aliases[$name])) {
 			$result = $aliases[$this->name];
 		}
 		return $result;
