@@ -16,7 +16,7 @@ define('PKWK_MAXSHOW_CACHE', 'recent.dat');
 define('PKWK_AUTOLINK_REGEX_CACHE', 'autolink.dat');
 
 // AutoAlias
-define('PKWK_AUTOALIAS_CACHE', 'autoalias.dat');
+define('PKWK_AUTOALIAS_REGEX_CACHE', 'autoalias.dat');
 
 /**
  * Get source(wiki text) data of the page
@@ -144,10 +144,10 @@ function page_write($page, $postdata, $notimestamp = FALSE)
 		$aliases = get_autoaliases();
 		if (empty($aliases)) {
 			// Remove
-			@unlink(CACHE_DIR . PKWK_AUTOALIAS_CACHE);
+			@unlink(CACHE_DIR . PKWK_AUTOALIAS_REGEX_CACHE);
 		} else {
 			// Create or Update
-			autolink_pattern_write(CACHE_DIR . PKWK_AUTOALIAS_CACHE,
+			autolink_pattern_write(CACHE_DIR . PKWK_AUTOALIAS_REGEX_CACHE,
 				get_autolink_pattern(array_keys($aliases), $autoalias));
 		}
 	}
