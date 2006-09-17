@@ -160,18 +160,20 @@ $nowikiname = 0;
 
 /////////////////////////////////////////////////
 // AutoLink feature
+// Automatic link to existing pages (especially helpful for non-wikiword pages, but heavy)
 
-// AutoLink minimum length of page name
+// Minimum length of page name
 $autolink = 0; // Bytes, 0 = OFF (try 8)
 
 /////////////////////////////////////////////////
 // AutoAlias feature
+// Automatic link from specified word, to specifiled URI, page or InterWiki
 
-// AutoAlias minimum bytes (0 = Disable)
-$autoalias = 0;
+// Minimum length of alias "from" word
+$autoalias = 0; // Bytes, 0 = OFF (try 8)
 
-// Maximum number of words which AutoAlias replace
-$autoalias_max_words = 50;
+// Limit loading valid alias pairs
+$autoalias_max_words = 50; // pairs
 
 /////////////////////////////////////////////////
 // Enable Freeze / Unfreeze feature
