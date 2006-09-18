@@ -813,22 +813,12 @@ class Link_autoalias extends Link
 
 	function toString()
 	{
-		$this->alias = $this->get_alias($this->name);
+		$this->alias = get_autoaliases($this->name);
 		if ($this->alias != '') {
 			$link = '[[' . $this->name . '>' . $this->alias . ']]';
 			return make_link($link);
 		}
 		return '';
-	}
-
-	function get_alias($name)
-	{
-		$aliases = get_autoaliases();
-		$result = '';
-		if (isset($aliases[$name])) {
-			$result = $aliases[$name];
-		}
-		return $result;
 	}
 }
 
