@@ -159,7 +159,7 @@ function links_init()
 
 			$_name = $_obj->name;
 			if (is_a($_obj, 'Link_autoalias')) {
-				$_alias = get_autoaliases($_obj->name);
+				$_alias = get_autoaliases($_name);
 				if (! is_pagename($_alias))
 					continue;	// not PageName
 				$_name = $_alias;
