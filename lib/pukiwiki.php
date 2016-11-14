@@ -65,19 +65,9 @@ if ($notify) {
 
 /////////////////////////////////////////////////
 // Main
-
-if (isset($vars['page'])) {
-	$page = $vars['page'];
-	foreach ($redirect_rules as $rule => $replace) {
-		if (preg_match($rule, $page)) {
-			$new_page = preg_replace($rule, $replace, $page);
-			header('Location: ' . get_script_uri() . '?' .
-				pagename_urlencode($new_page));
-			exit;
-		}
-	}
+if (manage_page_redirect()) {
+	exit;
 }
-
 $retvars = array();
 $is_cmd = FALSE;
 if (isset($vars['cmd'])) {
