@@ -269,6 +269,7 @@ function do_search($word, $type = 'AND', $non_format = FALSE, $base = '')
 
 	ksort($pages, SORT_STRING);
 
+
 	$retval = '<ul>' . "\n";
 	foreach (array_keys($pages) as $page) {
 		$r_page  = rawurlencode($page);
@@ -285,6 +286,116 @@ function do_search($word, $type = 'AND', $non_format = FALSE, $base = '')
 
 	return $retval;
 }
+
+function do_search_part($words, $start_index, $search_page_count)
+{
+//	echo 'aaa';
+//	print_r($words);
+//	echo 'bbb';
+	global $non_list;
+	$pages = get_existpages();
+	// Avoid
+	if ($base != '') {
+		$pages = preg_grep('/^' . preg_quote($base, '/') . '/S', $pages);
+	}
+	if (! $search_non_list) {
+		$pages = array_diff($pages, preg_grep('/' . $non_list . '/S', $pages));
+	}
+	$pages = array_flip($pages);
+	unset($pages[$whatsnew]);
+	$count = count($pages);
+	foreach (array_keys($pages) as $page) {
+		if (! check_readable($page, false, false)) {
+			unset($pages[$page]);
+			--$count;
+		}
+	}
+	$found_pages = array();
+	$i = 0;
+	$end_index = $start_index + $search_page_count;
+	$last_index = -1;
+	$last_search_page = '';
+	$next_search_index = -1;
+	foreach (array_keys($pages) as $page) {
+		if (($index = $i++) < $start_index) {
+			continue;
+		}
+		if ($end_index <= $index) {
+			$next_search_index = $index;
+			break;
+		}
+		$last_index = $index;
+		$last_search_page = $page;
+		$page_result = do_search_singlepage($words, $page);
+		if ($page_result === FALSE) {
+			continue;
+		}
+		$found_pages[] = $page_result;
+	}
+	$result = array(
+		'start_index' => $start_index,
+		'last_index' => $last_index,
+		'last_search_page' => $last_search_page, 
+	  'end_index' => $end_index,
+		'found_pages' => $found_pages,
+		'total_page_count' => count($pages),
+		'q' => $words
+	);
+	if ($next_search_index >= 0) {
+		$result['next_search_index'] = $next_search_index;
+	}
+	return $result;
+}
+
+function do_search_singlepage($words, $page) {
+	$max_lines = 20;
+	$prevlines = 2;
+	$extralines = 2;
+	$lines = get_source($page, TRUE, FALSE);
+	$result_lines = array();
+	$last_added_index = -1;
+	$last_found_index = -1;
+	foreach ($lines as $i => $line) {
+		if (search_words($words, $line)) {
+			for ($j = max($i - $prevlines, $last_added_index + 1); $j < $i; $j++) {
+				$result_lines[] = array('index' => $j, 'line' => $lines[$j]);
+			}
+			$result_lines[] = array('index' => $i, 'line' => $line);
+			$last_found_index = $i;
+			$last_added_index = $i;
+		} else {
+			if ($last_found_index >= 0 &&
+				$i <= $last_found_index + $extralines) {
+				$result_lines[] = array('index' => $i, 'line' => $line);
+				$last_added_index = $i;
+			}
+		}
+		if (count($result_lines) > $max_lines) {
+			break;
+		}
+	}
+	$link = get_script_uri() . '?' . pagename_urlencode($page); 
+	if (count($result_lines) > 0) {
+		return array(
+			'page' => $page,
+			'lines' => $result_lines,
+			'link' => $link
+			);
+	} else {
+		return FALSE;
+	}
+}
+
+function search_words($words, $target) {
+	$qwords = preg_quote($words, '/');
+	$m = null;
+	if (preg_match('/' . $qwords . '/i', $target, $m)) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+
 
 // Argument check for program
 function arg_check($str)

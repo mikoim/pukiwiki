@@ -29,6 +29,13 @@ function plugin_search_action()
 {
 	global $post, $vars, $_title_result, $_title_search, $_msg_searching;
 
+	if (isset($vars['action']) && $vars['action'] === 'list') {
+		header('Content-Type: applicaton/json');
+		$result = do_search_part($vars['q'], 0, 10);
+		$json = json_encode($result, JSON_UNESCAPED_UNICODE);
+		echo($json);
+		exit;
+	}
 	if (PLUGIN_SEARCH_DISABLE_GET_ACCESS) {
 		$s_word = isset($post['word']) ? htmlsc($post['word']) : '';
 	} else {
@@ -56,6 +63,7 @@ function plugin_search_action()
 	// Show search form
 	$bases = ($base == '') ? array() : array($base);
 	$body .= plugin_search_search_form($s_word, $type, $bases);
+	$body .= '<script src="skin/search.js"></script>' . "\n";
 
 	return array('msg'=>$msg, 'body'=>$body);
 }
