@@ -288,6 +288,19 @@ $edit_auth_pages = array(
 $search_auth = 0;
 
 /////////////////////////////////////////////////
+// AutoTicketLink
+$ticket_link_sites = array(
+/*
+	array(
+		'key' => 'phpbug',
+		'type' => 'redmine', // type: redmine or jira
+		'name' => 'PHP :: Bug #$1',
+		'base_url' => 'https://bugs.php.net/bug.php?id=',
+	),
+	*/
+);
+
+/////////////////////////////////////////////////
 // $whatsnew: Max number of RecentChanges
 $maxshow = 60;
 

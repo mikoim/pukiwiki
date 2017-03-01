@@ -68,6 +68,7 @@ header('Content-Type: text/html; charset=' . CONTENT_CHARSET);
  <link rel="SHORTCUT ICON" href="<?php echo $image['favicon'] ?>" />
  <link rel="stylesheet" type="text/css" href="<?php echo SKIN_DIR ?>pukiwiki.css" />
  <link rel="alternate" type="application/rss+xml" title="RSS" href="<?php echo $link['rss'] ?>" /><?php // RSS auto-discovery ?>
+ <script src="skin/ticketlink.js"></script>
 
 <?php echo $head_tag ?>
 </head>
@@ -267,6 +268,7 @@ function _toolbar($key, $x = 20, $y = 20){
  <?php echo S_COPYRIGHT ?>.
  Powered by PHP <?php echo PHP_VERSION ?>. HTML convert time: <?php echo elapsedtime() ?> sec.
 </div>
+<?php echo $html_scripting_data ?>
 
 </body>
 </html>

@@ -186,10 +186,39 @@ function catbody($title, $page, $body)
 		}
 	}
 
+	// Embed Scripting data
+	$html_scripting_data = get_html_scripting_data();
+
 	// Compat: 'HTML convert time' without time about MenuBar and skin
 	$taketime = elapsedtime();
 
 	require(SKIN_FILE);
+}
+
+function get_html_scripting_data()
+{
+	global $ticket_link_sites;
+	if (!isset($ticket_link_sites) || !is_array($ticket_link_sites)) {
+		return '';
+	}
+	$text = '';
+	foreach ($ticket_link_sites as $s) {
+		$key = htmlsc($s['key']);
+		$type = htmlsc($s['type']);
+		$name = htmlsc($s['name']);
+		$detail = htmlsc($s['detail']);
+		$base_url = htmlsc($s['base_url']);
+		$text .= <<<EOS
+  <span class="pukiwiki-ticketlink-site" data-site="key=$key,type=$type,detail=$detail,name=$name,baseUrl=$base_url" />
+EOS;
+		$text .= "\n";
+	}
+	$data = <<<EOS
+<div class="pukiwiki-ticketlink-def" style="display:none;">
+$text
+</div>
+EOS;
+	return $data;
 }
 
 // Show 'edit' form
