@@ -209,7 +209,7 @@ function get_html_scripting_data()
 		$detail = htmlsc($s['detail']);
 		$base_url = htmlsc($s['base_url']);
 		$text .= <<<EOS
-  <span class="pukiwiki-ticketlink-site" data-site="key=$key,type=$type,detail=$detail,name=$name,baseUrl=$base_url" />
+  <span class="pukiwiki-ticketlink-site" data-site="key=$key,type=$type,detail=$detail,name=$name,baseUrl=$base_url"></span>
 EOS;
 		$text .= "\n";
 	}
