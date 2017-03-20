@@ -195,21 +195,24 @@ function catbody($title, $page, $body)
 	require(SKIN_FILE);
 }
 
+/**
+ * Get data used by JavaScript modules
+ */
 function get_html_scripting_data()
 {
 	global $ticket_link_sites;
 	if (!isset($ticket_link_sites) || !is_array($ticket_link_sites)) {
 		return '';
 	}
+	// Require: PHP 5.4+
+	if (!defined('JSON_UNESCAPED_UNICODE')) {
+		return '';
+	};
 	$text = '';
 	foreach ($ticket_link_sites as $s) {
-		$key = htmlsc($s['key']);
-		$type = htmlsc($s['type']);
-		$name = htmlsc($s['name']);
-		$detail = htmlsc($s['detail']);
-		$base_url = htmlsc($s['base_url']);
+		$site_info_json = htmlsc(json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		$text .= <<<EOS
-  <span class="pukiwiki-ticketlink-site" data-site="key=$key,type=$type,detail=$detail,name=$name,baseUrl=$base_url"></span>
+  <span class="pukiwiki-ticketlink-site" data-site="$site_info_json"></span>
 EOS;
 		$text .= "\n";
 	}

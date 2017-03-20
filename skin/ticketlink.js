@@ -13,7 +13,7 @@ if (window.addEventListener) {
         var site = siteList[i];
         var m = keyText.match(site.re);
         if (m) {
-          return site.baseUrl + m[3];
+          return site.base_url + m[3];
         }
       }
       return '';
@@ -56,22 +56,8 @@ if (window.addEventListener) {
     }
     function textToSiteInfo(siteDef) {
       if (!siteDef) return null;
-      var sp = siteDef.split(',');
-      var info = {};
-      sp.forEach(function(s) {
-        if (startsWith(s, 'key=')) {
-          info.key = s.substr('key='.length);
-        } else if (startsWith(s, 'type=')) {
-          info.type = s.substr('type='.length);
-        } else if (startsWith(s, 'name=')) {
-          info.name = s.substr('name='.length);
-        } else if (startsWith(s, 'detail=')) {
-          info.detail = s.substr('detail='.length);
-        } else if (startsWith(s, 'baseUrl=')) {
-          info.baseUrl = s.substr('baseUrl='.length);
-        }
-      });
-      if (info.key && info.type && info.name && info.baseUrl) {
+      var info = JSON.parse(siteDef);
+      if (info && info.key && info.type && info.name && info.base_url) {
         return info;
       }
       return null;
