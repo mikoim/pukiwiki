@@ -29,7 +29,7 @@ if (window.addEventListener) {
         var reText = '';
         switch (site.type) {
           case 'jira':
-            reText = '(' + regexEscape(site.key) + '):' + '([A-Z][A-Z0-9]+-\\d+)';
+            reText = '(' + regexEscape(site.key) + '):' + '([A-Z][A-Z0-9_]+-\\d+)';
             break;
           case 'redmine':
             reText = '(' + regexEscape(site.key) + '):' + '(\\d+)';
