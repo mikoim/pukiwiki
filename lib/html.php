@@ -210,6 +210,9 @@ function get_html_scripting_data()
 	};
 	$text = '';
 	foreach ($ticket_link_sites as $s) {
+		if (!preg_match('/^([a-zA-Z0-9]+)([\.\-][a-zA-Z0-9]+)*$/', $s['key'])) {
+			continue;
+		}
 		$site_info_json = htmlsc(json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		$text .= <<<EOS
   <span class="pukiwiki-ticketlink-site" data-site="$site_info_json"></span>

@@ -18,16 +18,21 @@ if (window.addEventListener) {
       }
       return '';
     }
+    function regexEscape(key) {
+      return key.replace(/[\-\.]/g, function (m) {
+        return '\\' + m;
+      });
+    }
     function setupSites(siteList) {
       for (var i = 0, length = siteList.length; i < length; i++) {
         var site = siteList[i];
         var reText = '';
         switch (site.type) {
           case 'jira':
-            reText = '(' + site.key + '):' + '([A-Z][A-Z0-9]+-\\d+)';
+            reText = '(' + regexEscape(site.key) + '):' + '([A-Z][A-Z0-9]+-\\d+)';
             break;
           case 'redmine':
-            reText = '(' + site.key + '):' + '(\\d+)';
+            reText = '(' + regexEscape(site.key) + '):' + '(\\d+)';
             break;
           default:
             continue;
