@@ -7,16 +7,24 @@ if (window.addEventListener) {
     var headReText = '([\\s\\b]|^)';
     var tailReText = '\\b';
     var _siteList = getSiteListFromBody();
-    function ticketToUrl(keyText) {
+    function ticketToLink(keyText) {
       var siteList = getSiteList();
       for (var i = 0; i < siteList.length; i++) {
         var site = siteList[i];
         var m = keyText.match(site.re);
         if (m) {
-          return site.base_url + m[3];
+          var title = site.title;
+          var ticketKey = m[3]
+          if (title) {
+            title = title.replace(/\$1/g, ticketKey);
+          }
+          return {
+            url: site.base_url + m[3],
+            title: title
+          };
         }
       }
-      return '';
+      return null;
     }
     function regexEscape(key) {
       return key.replace(/[\-\.]/g, function (m) {
@@ -65,7 +73,7 @@ if (window.addEventListener) {
     function textToSiteInfo(siteDef) {
       if (!siteDef) return null;
       var info = JSON.parse(siteDef);
-      if (info && info.key && info.type && info.name && info.base_url) {
+      if (info && info.key && info.type && info.base_url) {
         return info;
       }
       return null;
@@ -101,7 +109,9 @@ if (window.addEventListener) {
         }
         var a = document.createElement('a');
         a.textContent = m[2];
-        a.href = ticketToUrl(a.textContent);
+        var linkInfo = ticketToLink(a.textContent);
+        a.href = linkInfo.url;
+        a.title = linkInfo.title;
         f.appendChild(a);
         text = text.substr(m.index + m[0].length);
       }
