@@ -1,8 +1,8 @@
 <?php
 // PukiWiki - Yet another WikiWikiWeb clone.
-// $Id: ls2.inc.php,v 1.30 2011/01/25 15:01:01 henoheno Exp $
-// Copyright (C)
-//   2002-2004, 2006-2007 PukiWiki Developers Team
+// ls2.inc.php
+// Copyright
+//   2002-2017  PukiWiki Development Team
 //   2002       panda  http://home.arino.jp/?ls2.inc.php 
 //   2002       Y.MASUI GPL2 http://masui.net/pukiwiki/ masui@masui.net (ls.inc.php)
 // License: GPL version 2
@@ -167,7 +167,7 @@ function plugin_ls2_get_headings($page, & $params, $level, $include = FALSE)
 //リスト構造を構築する
 function plugin_ls2_list_push(& $params, $level)
 {
-	global $_ul_left_margin, $_ul_margin, $_list_pad_str;
+	global $_list_pad_str;
 
 	$result = & $params['result'];
 	$saved  = & $params['saved'];
@@ -187,14 +187,10 @@ function plugin_ls2_list_push(& $params, $level)
 		$cont = FALSE;
 		array_unshift($saved, $close);
 
-		$left = ($level == $margin) ? $_ul_left_margin : 0;
 		if ($params['compact']) {
-			$left  += $_ul_margin;   // マージンを固定
 			$level -= ($margin - 1); // レベルを修正
-		} else {
-			$left += $margin * $_ul_margin;
 		}
-		$str = sprintf($_list_pad_str, $level, $left, $left);
+		$str = sprintf($_list_pad_str, $level);
 		array_push($result, sprintf($open, $str));
 	}
 
@@ -222,4 +218,3 @@ function plugin_ls2_check_arg($value, & $params)
 
 	$params['_args'][] = htmlsc($value); // Link title
 }
-?>

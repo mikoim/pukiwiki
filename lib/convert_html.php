@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone
 // convert_html.php
 // Copyright
-//   2002-2016 PukiWiki Development Team
+//   2002-2017 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -310,8 +310,6 @@ class ListContainer extends Element
 	var $tag2;
 	var $level;
 	var $style;
-	var $margin;
-	var $left_margin;
 
 	function ListContainer($tag, $tag2, $head, $text)
 	{
@@ -320,14 +318,6 @@ class ListContainer extends Element
 	function __construct($tag, $tag2, $head, $text)
 	{
 		parent::__construct();
-
-		$var_margin      = '_' . $tag . '_margin';
-		$var_left_margin = '_' . $tag . '_left_margin';
-		global $$var_margin, $$var_left_margin;
-
-		$this->margin      = $$var_margin;
-		$this->left_margin = $$var_left_margin;
-
 		$this->tag   = $tag;
 		$this->tag2  = $tag2;
 		$this->level = min(3, strspn($text, $head));
@@ -354,11 +344,7 @@ class ListContainer extends Element
 		if (isset($parent->parent) && is_a($parent->parent, 'ListContainer'))
 			$step -= $parent->parent->level;
 
-		$margin = $this->margin * $step;
-		if ($step == $this->level)
-			$margin += $this->left_margin;
-
-		$this->style = sprintf($_list_pad_str, $this->level, $margin, $margin);
+		$this->style = sprintf($_list_pad_str, $this->level);
 	}
 
 	function & insert(& $obj)
@@ -1071,12 +1057,9 @@ class Contents_UList extends ListContainer
 
 		parent::setParent($parent);
 		$step   = $this->level;
-		$margin = $this->left_margin;
 		if (isset($parent->parent) && is_a($parent->parent, 'ListContainer')) {
 			$step  -= $parent->parent->level;
-			$margin = 0;
 		}
-		$margin += $this->margin * ($step == $this->level ? 1 : $step);
-		$this->style = sprintf($_list_pad_str, $this->level, $margin, $margin);
+		$this->style = sprintf($_list_pad_str, $this->level);
 	}
 }

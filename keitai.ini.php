@@ -1,8 +1,8 @@
 <?php
 // PukiWiki - Yet another WikiWikiWeb clone.
-// $Id: keitai.ini.php,v 1.25 2005/12/10 07:57:30 henoheno Exp $
-// Copyright (C)
-//   2002-2005 PukiWiki Developers Team
+// keitai.ini.php
+// Copyright
+//   2002-2017 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -30,7 +30,8 @@ $search_word_color = 0;
 $list_index = 0;
 
 /////////////////////////////////////////////////
-// リスト構造の左マージン
+// Obsolete: リスト構造の左マージン (Leaves for compatibility of plugins)
+// Use list-n, list1,list2 and list3 CSS class instead
 $_ul_left_margin =  0;	// リストと画面左端との間隔(px)
 $_ul_margin      = 16;	// リストの階層間の間隔(px)
 $_ol_left_margin =  0;	// リストと画面左端との間隔(px)
@@ -383,5 +384,3 @@ switch ($ua_name) {
 }
 
 unset($matches, $ua_name, $ua_vers, $ua_agent, $special_rules);
-
-?>

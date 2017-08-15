@@ -2,8 +2,8 @@
 
 /*!
  * PukiWiki - Yet another WikiWikiWeb clone.
- * Copyright (C)
- *   2002-2016 PukiWiki Development Team
+ * Copyright
+ *   2002-2017 PukiWiki Development Team
  *   2001-2002 Originally written by yu-ji
  * License: GPL v2 or (at your option) any later version
  *
@@ -167,6 +167,49 @@ ul.list3 { list-style-type:square; }
 ol.list1 { list-style-type:decimal; }
 ol.list2 { list-style-type:lower-roman; }
 ol.list3 { list-style-type:lower-alpha; }
+
+/* Default list style */
+.list-n {
+	padding-left: 16px;
+	margin-left: 16px
+}
+/* Specific list style for list1-list4 */
+.list1 {
+	padding-left: 16px;
+	margin-left: 16px
+}
+.list2 {
+	padding-left: 32px;
+	margin-left: 32px
+}
+.list3 {
+	padding-left: 48px;
+	margin-left: 48px
+}
+.list1 .list2 {
+	padding-left: 16px;
+	margin-left: 16px
+}
+.list1 .list3 {
+	padding-left: 32px;
+	margin-left: 32px
+}
+.list2 .list3 {
+	padding-left: 16px;
+	margin-left: 16px
+}
+.list1 .list4 {
+	padding-left: 48px;
+	margin-left: 48px
+}
+.list2 .list4 {
+	padding-left: 32px;
+	margin-left: 32px
+}
+.list3 .list4 {
+	padding-left: 16px;
+	margin-left: 16px
+}
 
 div.ie5 { text-align:center; }
 
