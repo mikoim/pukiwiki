@@ -27,6 +27,38 @@ function pkwk_log($message)
 }
 
 /**
+ * Write access_log to update contents.
+ *
+ * @param $page page name
+ * @param $diff_content diff expression
+ */
+function pkwk_access_log_updates($page, $diff_content) {
+	global $user_agent;
+	$log_dir = 'accesslog';
+	$json_filename = $log_dir . '/accesslog.' . gmdate('Ymd') . '.json';
+	$log_filename = $log_dir . '/accesslog.' . gmdate('Ymd') . '.log';
+	$d = array(
+		'time' => gmdate('Y-m-d H:i:s'),
+		'uri' => $_SERVER['REQUEST_URI'],
+		'method' => $_SERVER['REQUEST_METHOD'],
+		'remote_addr' => $_SERVER['REMOTE_ADDR'],
+		'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+		'page' => $page,
+		'diff' => $diff_content
+	);
+	if (file_exists($log_dir) && defined('JSON_UNESCAPED_UNICODE')) {
+		// PHP5.4+
+		$line = json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
+		file_put_contents($json_filename, $line, FILE_APPEND | LOCK_EX);
+		$ltsv = "time:" . $d['time'] . "\turi:" . $d['uri'] .
+			"\tmethod:" . $d['method'] . "\tremote_addr:" . $d['remote_addr'] .
+			"\tuser_agent:" . $d['user_agent'] . "\tpage:" .
+			preg_replace('#[\t\r\n]#', '', $d['page']) . "\n";
+		file_put_contents($log_filename, $ltsv, FILE_APPEND | LOCK_EX);
+	}
+}
+
+/**
  * ctype_digit that supports PHP4+.
  *
  * PHP official document says PHP4 has ctype_digit() function.
