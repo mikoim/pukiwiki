@@ -207,7 +207,7 @@ function attach_upload($file, $page, $pass = NULL)
 		$footer['FILESIZE'] = & $file['size'];
 		$footer['PAGE']     = & $page;
 
-		$footer['URI']      = get_script_uri() .
+		$footer['URI']      = get_script_uri(PKWK_URI_ABSOLUTE) .
 			//'?' . pagename_urlencode($page);
 
 			// MD5 may heavy
@@ -644,7 +644,7 @@ EOD;
 			$footer['ACTION']   = 'File deleted';
 			$footer['FILENAME'] = & $this->file;
 			$footer['PAGE']     = & $this->page;
-			$footer['URI']      = get_script_uri() .
+			$footer['URI']      = get_script_uri(PKWK_URI_ABSOLUTE) .
 				'?' . pagename_urlencode($this->page);
 			$footer['USER_AGENT']  = TRUE;
 			$footer['REMOTE_ADDR'] = TRUE;

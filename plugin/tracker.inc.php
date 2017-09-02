@@ -188,7 +188,7 @@ function plugin_tracker_action()
 	$r_page = pagename_urlencode($page);
 
 	pkwk_headers_sent();
-	header('Location: ' . get_script_uri() . '?' . $r_page);
+	header('Location: ' . get_script_uri(PKWK_URI_ROOT) . '?' . $r_page);
 	exit;
 }
 
