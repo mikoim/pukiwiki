@@ -874,10 +874,10 @@ function _pkwk_base_uri_type_stack($peek, $push, $uri_type)
  * SERVER_PORT: $_SERVER['SERVER_PORT'] converted in init.php
  * SERVER_NAME: $_SERVER['SERVER_NAME'] converted in init.php
  */
-function guess_script_absolute_uri() {
+function guess_script_absolute_uri()
+{
 	$port = SERVER_PORT;
-	$is_ssl = (SERVER_PORT == 443) ||
-		(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+	$is_ssl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
 		(isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https');
 	if ($is_ssl) {
 		$host = 'https://' . SERVER_NAME .
