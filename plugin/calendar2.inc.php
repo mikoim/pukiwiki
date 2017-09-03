@@ -1,5 +1,9 @@
 <?php
-// $Id: calendar2.inc.php,v 1.24 2011/01/25 15:01:01 henoheno Exp $
+// PukiWiki - Yet another WikiWikiWeb clone
+// calendar2.inc.php
+// Copyright
+//   2002-2017 PukiWiki Development Team
+// License: GPL v2 or (at your option) any later version
 //
 // Calendar2 plugin
 //
@@ -9,9 +13,10 @@
 
 function plugin_calendar2_convert()
 {
-	global $script, $vars, $post, $get, $weeklabels, $WikiName, $BracketName;
+	global $vars, $post, $get, $weeklabels, $WikiName, $BracketName;
 	global $_calendar2_plugin_edit, $_calendar2_plugin_empty;
 
+	$script = get_script_uri();
 	$date_str = get_date('Ym');
 	$base     = strip_bracket($vars['page']);
 
@@ -197,4 +202,3 @@ function plugin_calendar2_action()
 
 	return $ret;
 }
-

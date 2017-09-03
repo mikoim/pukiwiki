@@ -380,8 +380,9 @@ function attach_mime_content_type($filename, $displayname)
 // アップロードフォームの出力
 function attach_form($page)
 {
-	global $script, $vars, $_attach_messages;
+	global $vars, $_attach_messages;
 
+	$script = get_script_uri();
 	$r_page = rawurlencode($page);
 	$s_page = htmlsc($page);
 	$navi = <<<EOD
@@ -496,8 +497,9 @@ class AttachFile
 
 	function toString($showicon, $showinfo)
 	{
-		global $script, $_attach_messages;
+		global $_attach_messages;
 
+		$script = get_script_uri();
 		$this->getstatus();
 		$param  = '&amp;file=' . rawurlencode($this->file) . '&amp;refer=' . rawurlencode($this->page) .
 			($this->age ? '&amp;age=' . $this->age : '');
@@ -519,8 +521,9 @@ class AttachFile
 	// 情報表示
 	function info($err)
 	{
-		global $script, $_attach_messages;
+		global $_attach_messages;
 
+		$script = get_script_uri();
 		$r_page = rawurlencode($this->page);
 		$s_page = htmlsc($this->page);
 		$s_file = htmlsc($this->file);

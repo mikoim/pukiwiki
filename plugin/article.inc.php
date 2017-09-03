@@ -1,7 +1,8 @@
 <?php
-// $Id: article.inc.php,v 1.28 2011/01/25 15:01:01 henoheno Exp $
-// Copyright (C)
-//   2002-2005 PukiWiki Developers Team
+// PukiWiki - Yet another WikiWikiWeb clone
+// article.inc.php
+// Copyright
+//   2002-2017 PukiWiki Development Team
 //   2002      Originally written by OKAWARA,Satoshi <kawara@dml.co.jp>
 //             http://www.dml.co.jp/~kawara/pukiwiki/pukiwiki.php
 //
@@ -45,11 +46,12 @@ $_plugin_article_mailto = array (
 
 function plugin_article_action()
 {
-	global $script, $post, $vars, $cols, $rows, $now;
+	global $post, $vars, $cols, $rows, $now;
 	global $_title_collided, $_msg_collided, $_title_updated;
 	global $_plugin_article_mailto, $_no_subject, $_no_name;
 	global $_msg_article_mail_sender, $_msg_article_mail_page;
 
+	$script = get_script_uri();
 	if (PKWK_READONLY) die_message('PKWK_READONLY prohibits editing');
 
 	if ($post['msg'] == '')
@@ -121,7 +123,7 @@ EOD;
 			$mailbody .= "\n\n" . '---' . "\n";
 			$mailbody .= $_msg_article_mail_sender . $post['name'] . ' (' . $now . ')' . "\n";
 			$mailbody .= $_msg_article_mail_page . $post['refer'] . "\n";
-			$mailbody .= '   URL: ' . $script . '?' . pagename_urlencode($post['refer']) . "\n";
+			$mailbody .= '   URL: ' . get_script_uri(PKWK_URI_ABSOLUTE) . '?' . pagename_urlencode($post['refer']) . "\n";
 			$mailbody = mb_convert_encoding($mailbody, 'JIS');
 
 			$mailaddheader = 'From: ' . PLUGIN_ARTICLE_MAIL_FROM;
@@ -142,10 +144,11 @@ EOD;
 
 function plugin_article_convert()
 {
-	global $script, $vars, $digest;
+	global $vars, $digest;
 	global $_btn_article, $_btn_name, $_btn_subject;
 	static $numbers = array();
 
+	$script = get_script_uri();
 	if (PKWK_READONLY) return ''; // Show nothing
 
 	if (! isset($numbers[$vars['page']])) $numbers[$vars['page']] = 0;
@@ -177,4 +180,3 @@ EOD;
 
 	return $string;
 }
-

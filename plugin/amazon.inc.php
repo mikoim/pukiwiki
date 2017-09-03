@@ -112,8 +112,9 @@ EOD;
 
 function plugin_amazon_convert()
 {
-	global $script, $vars, $asin, $asin_all;
+	global $vars, $asin, $asin_all;
 
+	$script = get_script_uri();
 	if (func_num_args() > 3) {
 		if (PKWK_READONLY) return ''; // Show nothing
 
@@ -187,7 +188,7 @@ EOD;
 
 function plugin_amazon_action()
 {
-	global $vars, $script, $edit_auth, $edit_auth_users;
+	global $vars, $edit_auth, $edit_auth_users;
 	global $amazon_body, $asin, $asin_all;
 
 	if (PKWK_READONLY) die_message('PKWK_READONLY prohibits editing');

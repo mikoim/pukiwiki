@@ -1,8 +1,7 @@
 <?php
 // PukiWiki - Yet another WikiWikiWeb clone
 // paint.inc.php
-// Copyright
-//   2002-2016 PukiWiki Development Team
+// Copyright 2002-2017 PukiWiki Development Team
 // License: GPL v2 or (at your option) any later version
 //
 // Paint plugin
@@ -40,8 +39,9 @@ define('PAINT_FORMAT_NOMSG',"\x08NAME\x08 \x08NOW\x08");
 
 function plugin_paint_action()
 {
-	global $script, $vars, $_paint_messages;
+	global $vars, $_paint_messages;
 
+	$script = get_script_uri();
 	if (PKWK_READONLY) die_message('PKWK_READONLY prohibits editing');
 	
 	//戻り値を初期化
@@ -151,10 +151,11 @@ EOD;
 
 function plugin_paint_convert()
 {
-	global $script,$vars,$digest;
+	global $vars,$digest;
 	global $_paint_messages;
 	static $numbers = array();
 
+	$script = get_script_uri();
 	if (PKWK_READONLY) return ''; // Show nothing
 
 	if (!array_key_exists($vars['page'],$numbers))
@@ -207,7 +208,7 @@ EOD;
 }
 function paint_insert_ref($filename)
 {
-	global $script,$vars,$now,$do_backup;
+	global $vars,$now,$do_backup;
 	global $_paint_messages,$_no_name;
 
 	$ret['msg'] = $_paint_messages['msg_title'];

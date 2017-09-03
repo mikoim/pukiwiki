@@ -17,8 +17,9 @@ define('TRACKER_LIST_SHOW_ERROR_PAGE',TRUE);
 
 function plugin_tracker_convert()
 {
-	global $script,$vars;
+	global $vars;
 
+	$script = get_script_uri();
 	if (PKWK_READONLY) return ''; // Show nothing
 
 	$base = $refer = $vars['page'];
@@ -656,7 +657,7 @@ function plugin_tracker_list_convert()
 }
 function plugin_tracker_list_action()
 {
-	global $script,$vars,$_tracker_messages;
+	global $vars,$_tracker_messages;
 
 	$page = $refer = $vars['refer'];
 	$s_page = make_pagelink($page);
@@ -881,8 +882,7 @@ class Tracker_list
 	}
 	function replace_title($arr)
 	{
-		global $script;
-
+		$script = get_script_uri();
 		$field = $sort = $arr[1];
 		if ($sort == '_name' or $sort == '_page')
 		{
