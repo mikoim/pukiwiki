@@ -15,6 +15,9 @@ define('PKWK_MAXSHOW_CACHE', 'recent.dat');
 // AutoLink
 define('PKWK_AUTOLINK_REGEX_CACHE', 'autolink.dat');
 
+// File mode for pkwk_touch
+//define('PKWK_DATA_FILE_PERMS', 0644);
+
 // Get source(wiki text) data of the page
 // Returns FALSE if error occurerd
 function get_source($page = NULL, $lock = TRUE, $join = FALSE)
@@ -858,6 +861,9 @@ function pkwk_touch_file($filename, $time = FALSE, $atime = FALSE)
 			$result = touch($filename, $time);
 		} else {
 			$result = touch($filename, $time, $atime);
+		}
+		if (defined('PKWK_DATA_FILE_PERMS')) {
+			chmod($filename, PKWK_DATA_FILE_PERMS);
 		}
 		return $result;
 	} else {
