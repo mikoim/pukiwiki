@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone.
 // ja.lng.php
 // Copyright
-//   2002-2016 PukiWiki Development Team
+//   2002-2017 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -114,7 +114,7 @@ $_LANG['skin']['rename']    = '名前変更';	// Rename a page (and related)
 $_LANG['skin']['rss']       = '最終更新のRSS';	// RSS of RecentChanges
 $_LANG['skin']['rss10']     = & $_LANG['skin']['rss'];
 $_LANG['skin']['rss20']     = & $_LANG['skin']['rss'];
-$_LANG['skin']['search']    = '単語検索';
+$_LANG['skin']['search']    = '検索';
 $_LANG['skin']['top']       = 'トップ';	// Top page
 $_LANG['skin']['unfreeze']  = '凍結解除';
 $_LANG['skin']['upload']    = '添付';	// Attach a file
@@ -361,7 +361,7 @@ $_rename_messages  = array(
 
 ///////////////////////////////////////
 // search.inc.php
-$_title_search  = '単語検索';
+$_title_search  = '検索';
 $_title_result  = '$1 の検索結果';
 $_msg_searching = '全てのページから単語を検索します。大文字小文字の区別はありません。';
 $_btn_search    = '検索';
@@ -369,6 +369,8 @@ $_btn_and       = 'AND検索';
 $_btn_or        = 'OR検索';
 $_search_pages  = '$1 から始まるページを検索';
 $_search_all    = '全てのページを検索';
+$_search_searching = '検索中...';
+$_search_detail = '詳細表示';
 
 ///////////////////////////////////////
 // source.inc.php

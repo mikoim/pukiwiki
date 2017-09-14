@@ -641,6 +641,14 @@ tr.bugtrack_state_undef td {
 	background-color: #ff3333;
 }
 
+/* search2.inc.php  */
+input#_plugin_search2_detail:checked ~ ul > pre {
+	display: block;
+}
+input#_plugin_search2_detail ~ ul > pre {
+	display: none;
+}
+
 @media print {
   a:link,
   a:visited {

@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone.
 // en.lng.php
 // Copyright
-//   2002-2016 PukiWiki Development Team
+//   2002-2017 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -367,6 +367,8 @@ $_btn_and       = 'AND';
 $_btn_or        = 'OR';
 $_search_pages  = 'Search for page starts from $1';
 $_search_all    = 'Search for all pages';
+$_search_searching = 'Searching...';
+$_search_detail = 'Show details';
 
 ///////////////////////////////////////
 // source.inc.php
