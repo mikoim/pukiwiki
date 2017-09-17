@@ -11,6 +11,7 @@ define('PLUGIN_SEARCH2_MAX_BASE',   16); // #search(1,2,3,...,15,16)
 
 define('PLUGIN_SEARCH2_RESULT_RECORD_LIMIT', 500);
 define('PLUGIN_SEARCH2_RESULT_RECORD_LIMIT_START', 100);
+define('PLUGIN_SEARCH2_SEARCH_WAIT_MILLISECONDS', 1000);
 
 // Show a search box on a page
 function plugin_search2_convert()
@@ -196,6 +197,7 @@ EOD;
 	}
 	$_search2_result_notfound = htmlsc($_msg_notfoundresult);
 	$_search2_result_found = htmlsc($_msg_andresult);
+	$_search2_search_wait_milliseconds = PLUGIN_SEARCH2_SEARCH_WAIT_MILLISECONDS;
 	$result_page_panel =<<<EOD
 <div id="_plugin_search2_search_status"></div>
 <div id="_plugin_search2_message"></div>
@@ -203,6 +205,7 @@ EOD;
 <input type="hidden" id="_plugin_search2_msg_searching" value="$_search_searching">
 <input type="hidden" id="_plugin_search2_msg_result_notfound" value="$_search2_result_notfound">
 <input type="hidden" id="_plugin_search2_msg_result_found" value="$_search2_result_found">
+<input type="hidden" id="_search2_search_wait_milliseconds" value="$_search2_search_wait_milliseconds">
 EOD;
 	if ($h_search_text == '') {
 		$result_page_panel = '';

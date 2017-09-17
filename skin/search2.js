@@ -10,7 +10,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
     var aroundLines = 2;
     var maxResultLines = 20;
     var minBlockLines = 5;
-    var searchWaitMilliseconds = 100;
+    var minSearchWaitMilliseconds = 100;
     function escapeHTML (s) {
       if(typeof s !== 'string') {
         s = '' + s;
@@ -114,9 +114,19 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         ul.appendChild(fragment);
       });
       if (!obj.search_done && obj.next_start_index) {
+        var waitE = document.querySelector('#_search2_search_wait_milliseconds');
+        var interval = minSearchWaitMilliseconds;
+        try {
+          interval = parseInt(waitE.value);
+        } catch (e) {
+          interval = minSearchWaitMilliseconds;
+        }
+        if (interval < minSearchWaitMilliseconds) {
+          interval = minSearchWaitMilliseconds;
+        }
         setTimeout(function(){
           doSearch(searchText, session, obj.next_start_index);
-        }, searchWaitMilliseconds);
+        }, interval);
       }
     }
     function textToRegex(searchText) {
