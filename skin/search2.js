@@ -10,6 +10,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
     var aroundLines = 2;
     var maxResultLines = 20;
     var minBlockLines = 5;
+    var searchWaitMilliseconds = 100;
     function escapeHTML (s) {
       if(typeof s !== 'string') {
         s = '' + s;
@@ -23,11 +24,12 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         }[m];
       });
     }
-    function doSearch(text) {
+    function doSearch(searchText, session, startIndex) {
       var url = './?cmd=search2&action=query';
-      if (text) {
-        url += '&q=' + encodeURIComponent(text);
+      if (searchText) {
+        url += '&q=' + encodeURIComponent(searchText);
       }
+      url += '&start=' + startIndex;
       fetch (url
       ).then(function(response){
         if (response.ok) {
@@ -37,16 +39,32 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             + response.statusText + ' on ' + url);
         }
       }).then(function(obj) {
-        showResult(obj, text);
+        showResult(obj, session, searchText);
       })['catch'](function(err){
         console.log(err);
         console.log('Error! Please check JavaScript console' + '\n' + JSON.stringify(err) + '|' + err);
       });
     }
-    function showResult(obj, searchText) {
+    function getMessageTemplate(idText, defaultText) {
+      var messageHolder = document.querySelector('#' + idText);
+      var messageTemplate = (messageHolder && messageHolder.value) || defaultText;
+      return messageTemplate;
+    }
+    function showResult(obj, session, searchText) {
+      var searchRegex = textToRegex(searchText);
       var ul = document.querySelector('#result-list');
       if (!ul) return;
-      ul.innerHTML = '';
+      if (obj.start_index === 0) {
+        ul.innerHTML = '';
+      }
+      if (! session.scan_page_count) session.scan_page_count = 0;
+      if (! session.read_page_count) session.read_page_count = 0;
+      if (! session.hit_page_count) session.hit_page_count = 0;
+      session.scan_page_count += obj.scan_page_count;
+      session.read_page_count += obj.read_page_count;
+      session.hit_page_count += obj.results.length;
+      session.page_count = obj.page_count;
+
       var msg = obj.message;
       var notFoundMessageTemplate = getMessageTemplate('_plugin_search2_msg_result_notfound',
         'No page which contains $1 has been found.');
@@ -77,9 +95,6 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         setSearchStatus(msg + progress);
       }
       var results = obj.results;
-      document.querySelector('#_plugin_search2_message').innerHTML = msg;
-      setSearchStatus('');
-      var searchRegex = textToRegex(searchText);
       results.forEach(function(val, index) {
         var fragment = document.createDocumentFragment();
         var li = document.createElement('li');
@@ -98,6 +113,11 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         }
         ul.appendChild(fragment);
       });
+      if (!obj.search_done && obj.next_start_index) {
+        setTimeout(function(){
+          doSearch(searchText, session, obj.next_start_index);
+        }, searchWaitMilliseconds);
+      }
     }
     function textToRegex(searchText) {
       var regEscape = /[\\^$.*+?()[\]{}|]/g;

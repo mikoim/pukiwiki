@@ -9,6 +9,9 @@
 define('PLUGIN_SEARCH2_MAX_LENGTH', 80);
 define('PLUGIN_SEARCH2_MAX_BASE',   16); // #search(1,2,3,...,15,16)
 
+define('PLUGIN_SEARCH2_RESULT_RECORD_LIMIT', 500);
+define('PLUGIN_SEARCH2_RESULT_RECORD_LIMIT_START', 100);
+
 // Show a search box on a page
 function plugin_search2_convert()
 {
@@ -22,6 +25,8 @@ function plugin_search2_action()
 
 	$action = isset($vars['action']) ? $vars['action'] : '';
 	$base = isset($vars['base']) ? $vars['base'] : '';
+	$start_s = isset($vars['start']) ? $vars['start'] : '';
+	$start_index = pkwk_ctype_digit($start_s) ? intval($start_s) : 0;
 	$bases = array();
 	if ($base !== '') {
 		$bases[] = $base;
@@ -38,17 +43,19 @@ function plugin_search2_action()
 		}
 	} else if ($action === 'query') {
 		$text = isset($vars['q']) ? $vars['q'] : '';
-		plugin_search2_do_search($text, $base);
+		plugin_search2_do_search($text, $base, $start_index);
 		exit;
 	}
 }
 
-function plugin_search2_do_search($query_text, $base)
+function plugin_search2_do_search($query_text, $base, $start_index)
 {
 	global $whatsnew, $non_list, $search_non_list;
 	global $_msg_andresult, $_msg_orresult, $_msg_notfoundresult;
 	global $search_auth;
 
+	$result_record_limit = $start_index === 0 ?
+		PLUGIN_SEARCH2_RESULT_RECORD_LIMIT_START : PLUGIN_SEARCH2_RESULT_RECORD_LIMIT;
 	$type = 'AND';
 	$word = $query_text;
 	$retval = array();
@@ -73,9 +80,14 @@ function plugin_search2_do_search($query_text, $base)
 	$page_names = array_keys($pages);
 
 	$found_pages = array();
+	$readable_page_index = -1;
+	$scan_page_index = -1;
+	$saved_scan_start_index = -1;
+	$last_read_page_name = null;
 	foreach ($page_names as $page) {
 		$b_match = FALSE;
 		$pagename_only = false;
+		$scan_page_index++;
 		if (! is_page_readable($page)) {
 			if ($search_auth) {
 				// $search_auth - 1: User can know page names that contain search text if the page is readable
@@ -83,6 +95,14 @@ function plugin_search2_do_search($query_text, $base)
 			}
 			// $search_auth - 0: All users can know page names that conntain search text
 			$pagename_only = true;
+		}
+		$readable_page_index++;
+		if ($readable_page_index < $start_index) {
+			// Skip: It's not time to read
+			continue;
+		}
+		if ($saved_scan_start_index === -1) {
+			$saved_scan_start_index = $scan_page_index;
 		}
 		// Search for page name and contents
 		$raw_lines = get_source($page, TRUE, FALSE);
@@ -104,20 +124,37 @@ function plugin_search2_do_search($query_text, $base)
 				$found_pages[] = array('name' => (string)$page,
 				'url' => get_page_uri($page), 'body' => (string)$body);
 			}
-			continue;
+		}
+		$last_read_page_name = $page;
+		if ($start_index + $result_record_limit <= $readable_page_index + 1) {
+			// Read page limit
+			break;
 		}
 	}
 	$s_word = htmlsc($word);
+	/*
 	if (empty($found_pages)) {
 		$message = str_replace('$1', $s_word, $_msg_notfoundresult);
 		$result_obj = array('message' => $message, 'results' => array());
 		print(json_encode($result_obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		return;
 	}
+	*/
 	$message = str_replace('$1', $s_word, str_replace('$2', count($found_pages),
 		str_replace('$3', count($page_names), $b_type_and ? $_msg_andresult : $_msg_orresult)));
-
-	$result_obj = array('message' => $message, 'results' => $found_pages);
+	$search_done = (boolean)($scan_page_index + 1 === count($page_names));
+	$result_obj = array(
+		'message' => $message,
+		'q' => $word,
+		'start_index' => $start_index,
+		'limit' => $result_record_limit,
+		'read_page_count' => $readable_page_index - $start_index + 1,
+		'scan_page_count' => $scan_page_index - $saved_scan_start_index + 1,
+		'page_count' => count($page_names),
+		'last_read_page_name' => $last_read_page_name,
+		'next_start_index' => $readable_page_index + 1,
+		'search_done' => $search_done,
+		'results' => $found_pages);
 	print(json_encode($result_obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
@@ -157,6 +194,8 @@ EOD;
 EOD;
 		$base_option = '<div class="small">' . $base_msg . '</div>';
 	}
+	$_search2_result_notfound = htmlsc($_msg_notfoundresult);
+	$_search2_result_found = htmlsc($_msg_andresult);
 	$result_page_panel =<<<EOD
 <div id="_plugin_search2_search_status"></div>
 <div id="_plugin_search2_message"></div>
