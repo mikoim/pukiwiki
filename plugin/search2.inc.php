@@ -106,10 +106,8 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 			$saved_scan_start_index = $scan_page_index;
 		}
 		// Search for page name and contents
-		$raw_lines = get_source($page, TRUE, FALSE);
-		$lines = remove_author_lines($raw_lines);
-		$body = join('', $raw_lines);
-		$target = $page . '\n' . join('', $lines);
+		$body = get_source($page, TRUE, TRUE, TRUE);
+		$target = $page . "\n" . remove_author_header($body);
 		foreach ($keys as $key) {
 			$b_match = preg_match($key, $target);
 			if ($b_type_and xor $b_match) break; // OR
@@ -123,7 +121,7 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 					'pagename_only' => 1);
 			} else {
 				$found_pages[] = array('name' => (string)$page,
-				'url' => get_page_uri($page), 'body' => (string)$body);
+					'url' => get_page_uri($page), 'body' => (string)$body);
 			}
 		}
 		$last_read_page_name = $page;
