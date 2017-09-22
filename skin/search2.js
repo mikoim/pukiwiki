@@ -333,44 +333,51 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             var url = loc.protocol + '//' + loc.host + loc.pathname +
               '?cmd=search2' +
               (base ? '&base=' + encodeURIComponent(base) : '') +
-              '&q=' + encodeURIComponent(q);
+              '&q=' + encodeSearthText(q);
             e.preventDefault();
             setTimeout(function() {
               location.href = url;
             }, 1);
             return false;
           });
-        }
-        f.querySelectorAll('input[type="radio"][name="type"]').forEach(function(radio){
-          if (radio.value === 'AND') {
-            radio.addEventListener('click', onAndRadioClick);
-          } else if (radio.value === 'OR') {
-            radio.addEventListener('click', onOrRadioClick);
+          f.querySelectorAll('input[type="radio"][name="type"]').forEach(function(radio){
+            if (radio.value === 'AND') {
+              radio.addEventListener('click', onAndRadioClick);
+            } else if (radio.value === 'OR') {
+              radio.addEventListener('click', onOrRadioClick);
+            }
+          });;
+          function onAndRadioClick(e) {
+            var sp = removeSearchOperators(f.word.value).split(/\s+/);
+            var newText = sp.join(' ');
+            if (f.word.value !== newText) {
+              f.word.value = newText;
+            }
           }
-        });;
-        function onAndRadioClick(e) {
-          var sp = removeSearchOperators(f.word.value).split(/\s+/);
-          var newText = sp.join(' ');
-          if (f.word.value !== newText) {
-            f.word.value = newText;
-          }
-        }
-        function onOrRadioClick(e) {
-          var sp = removeSearchOperators(f.word.value).split(/\s+/);
-          var newText = sp.join(' OR ');
-          if (f.word.value !== newText) {
-            f.word.value = newText;
+          function onOrRadioClick(e) {
+            var sp = removeSearchOperators(f.word.value).split(/\s+/);
+            var newText = sp.join(' OR ');
+            if (f.word.value !== newText) {
+              f.word.value = newText;
+            }
           }
         }
       });
+      function encodeSearthText(q) {
+        var sp = q.split(/\s+/);
+        for (var i = 0; i < sp.length; i++) {
+          sp[i] = encodeURIComponent(sp[i]);
+        }
+        return sp.join('+');
+      }
     }
-    function isEnabledFunctions() {
+    function isEnabledFetchFunctions() {
       if (window.fetch && document.querySelector) {
         return true;
       }
       return false;
     }
-    if (! isEnabledFunctions()) return;
+    if (! isEnabledFetchFunctions()) return;
     replaceSearchWithSearch2();
     hookSearch2();
     removeEncodeHint();
