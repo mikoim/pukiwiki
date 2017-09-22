@@ -57,12 +57,18 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 
 	$result_record_limit = $start_index === 0 ?
 		PLUGIN_SEARCH2_RESULT_RECORD_LIMIT_START : PLUGIN_SEARCH2_RESULT_RECORD_LIMIT;
-	$type = 'AND';
-	$word = $query_text;
 	$retval = array();
 
-	$b_type_and = ($type == 'AND'); // AND:TRUE OR:FALSE
-	$keys = get_search_words(preg_split('/\s+/', $word, -1, PREG_SPLIT_NO_EMPTY));
+	$b_type_and = true; // AND:TRUE OR:FALSE
+	$key_candidates = preg_split('/\s+/', $query_text, -1, PREG_SPLIT_NO_EMPTY);
+	for ($i = count($key_candidates) - 1; $i >= 0; $i--) {
+		if ($key_candidates[$i] === 'OR') {
+			$b_type_and = false;
+			unset($key_candidates[$i]);
+		}
+	}
+	$key_candidates = array_merge($key_candidates);
+	$keys = get_search_words($key_candidates);
 	foreach ($keys as $key=>$value)
 		$keys[$key] = '/' . $value . '/S';
 
@@ -136,21 +142,12 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 			break;
 		}
 	}
-	$s_word = htmlsc($word);
-	/*
-	if (empty($found_pages)) {
-		$message = str_replace('$1', $s_word, $_msg_notfoundresult);
-		$result_obj = array('message' => $message, 'results' => array());
-		print(json_encode($result_obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		return;
-	}
-	*/
-	$message = str_replace('$1', $s_word, str_replace('$2', count($found_pages),
+	$message = str_replace('$1', htmlsc($query_text), str_replace('$2', count($found_pages),
 		str_replace('$3', count($page_names), $b_type_and ? $_msg_andresult : $_msg_orresult)));
 	$search_done = (boolean)($scan_page_index + 1 === count($page_names));
 	$result_obj = array(
 		'message' => $message,
-		'q' => $word,
+		'q' => $query_text,
 		'start_index' => $start_index,
 		'limit' => $result_record_limit,
 		'read_page_count' => $readable_page_index - $start_index + 1,

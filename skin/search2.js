@@ -68,11 +68,23 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         t = t / card;
       }
       return '(' + Math.floor(t) + unit + ')';
-      //console.log('now and d: ' + now.getTime() + ' : ' + d.getTime());
-      //return '' + Math.floor() / (1000 * 60 * 60 * 24)) + 'd';
+    }
+    function removeSearchOperators(searchText) {
+      var sp = searchText.split(/\s+/);
+      if (sp.length <= 1) {
+        return searchText;
+      }
+      var hasOr = false;
+      for (var i = sp.length - 1; i >= 0; i--) {
+        if (sp[i] === 'OR') {
+          hasOr = true;
+          sp.splice(i, 1);
+        }
+      }
+      return sp.join(' ');
     }
     function showResult(obj, session, searchText) {
-      var searchRegex = textToRegex(searchText);
+      var searchRegex = textToRegex(removeSearchOperators(searchText));
       var ul = document.querySelector('#result-list');
       if (!ul) return;
       if (obj.start_index === 0) {
@@ -126,11 +138,9 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
           decoratedName = escapeHTML(val.name);
         }
         var author = getAuthorHeader(val.body);
-        console.log('author:' + author);
         var updatedAt = '';
         if (author) {
           updatedAt = getUpdateTimeFromAuthorInfo(author);
-          console.log(updatedAt);
         } else {
           updatedAt = val.updated_at;
         }
@@ -314,8 +324,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
     }
     function replaceSearchWithSearch2() {
       var forms = document.querySelectorAll('form');
-      for (var i = 0; i < forms.length; i++) {
-        var f = forms[i];
+      forms.forEach(function(f){
         if (f.action.match(/cmd=search$/)) {
           f.addEventListener('submit', function(e) {
             var q = e.target.word.value;
@@ -332,7 +341,28 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             return false;
           });
         }
-      }
+        f.querySelectorAll('input[type="radio"][name="type"]').forEach(function(radio){
+          if (radio.value === 'AND') {
+            radio.addEventListener('click', onAndRadioClick);
+          } else if (radio.value === 'OR') {
+            radio.addEventListener('click', onOrRadioClick);
+          }
+        });;
+        function onAndRadioClick(e) {
+          var sp = removeSearchOperators(f.word.value).split(/\s+/);
+          var newText = sp.join(' ');
+          if (f.word.value !== newText) {
+            f.word.value = newText;
+          }
+        }
+        function onOrRadioClick(e) {
+          var sp = removeSearchOperators(f.word.value).split(/\s+/);
+          var newText = sp.join(' OR ');
+          if (f.word.value !== newText) {
+            f.word.value = newText;
+          }
+        }
+      });
     }
     function isEnabledFunctions() {
       if (window.fetch && document.querySelector) {
