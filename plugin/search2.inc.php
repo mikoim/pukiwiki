@@ -114,14 +114,20 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 		}
 		if ($b_match) {
 			// Found!
+			$filemtime = null;
+			$author_info = get_author_info($body);
+			if ($author_info === false || $pagename_only) {
+				$updated_at = get_date_atom(filemtime(get_filename($page)));
+			}
 			if ($pagename_only) {
 				// The user cannot read this page body
 				$found_pages[] = array('name' => (string)$page,
-					'url' => get_page_uri($page), 'body' => '',
-					'pagename_only' => 1);
+					'url' => get_page_uri($page), 'updated_at' => $updated_at,
+					'body' => '', 'pagename_only' => 1);
 			} else {
 				$found_pages[] = array('name' => (string)$page,
-					'url' => get_page_uri($page), 'body' => (string)$body);
+					'url' => get_page_uri($page), 'updated_at' => $updated_at,
+					'body' => (string)$body);
 			}
 		}
 		$last_read_page_name = $page;

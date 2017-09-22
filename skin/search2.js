@@ -50,6 +50,27 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       var messageTemplate = (messageHolder && messageHolder.value) || defaultText;
       return messageTemplate;
     }
+    function getAuthorInfo(text) {
+
+    }
+    function getPassage(now, dateText) {
+      if (! dateText) {
+        return '';
+      }
+      var units = [{u: 'm', max: 60}, {u: 'h', max: 24}, {u: 'd', max: 1}];
+      var d = new Date();
+      d.setTime(Date.parse(dateText));
+      var t = (now.getTime() - d.getTime()) / (1000 * 60); // minutes
+      var unit = units[0].u, card = units[0].max;
+      for (var i = 0; i < units.length; i++) {
+        unit = units[i].u, card = units[i].max;
+        if (t < card) break;
+        t = t / card;
+      }
+      return '(' + Math.floor(t) + unit + ')';
+      //console.log('now and d: ' + now.getTime() + ' : ' + d.getTime());
+      //return '' + Math.floor() / (1000 * 60 * 60 * 24)) + 'd';
+    }
     function showResult(obj, session, searchText) {
       var searchRegex = textToRegex(searchText);
       var ul = document.querySelector('#result-list');
@@ -95,6 +116,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         setSearchStatus(msg + progress);
       }
       var results = obj.results;
+      var now = new Date();
       results.forEach(function(val, index) {
         var fragment = document.createDocumentFragment();
         var li = document.createElement('li');
@@ -103,7 +125,16 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         if (! decoratedName) {
           decoratedName = escapeHTML(val.name);
         }
-        li.innerHTML = '<a href="' + href + '">' + decoratedName + '</a>';
+        var author = getAuthorHeader(val.body);
+        console.log('author:' + author);
+        var updatedAt = '';
+        if (author) {
+          updatedAt = getUpdateTimeFromAuthorInfo(author);
+          console.log(updatedAt);
+        } else {
+          updatedAt = val.updated_at;
+        }
+        li.innerHTML = '<a href="' + href + '">' + decoratedName + '</a> ' + getPassage(now, updatedAt);
         fragment.appendChild(li);
         var summary = getSummary(val.body, searchRegex);
         for (var i = 0; i < summary.length; i++) {
@@ -141,6 +172,30 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         rText += '(' + sp[i].replace(regEscape, '\\$&') + ')';
       }
       return new RegExp(rText, 'ig');
+    }
+    function getAuthorHeader(body) {
+      var start = 0;
+      var pos;
+      while ((pos = body.indexOf('\n', start)) >= 0) {
+        var line = body.substring(start, pos);
+        if (line.match(/^#author\(/, line)) {
+          return line;
+        } else if (line.match(/^#freeze(\W|$)/, line)) {
+          // Found #freeze still in header
+        } else {
+          // other line, #author not found
+          return null;
+        }
+        start = pos + 1;
+      }
+      return null;
+    }
+    function getUpdateTimeFromAuthorInfo(authorInfo) {
+      var m = authorInfo.match(/^#author\("([^;"]+)(;[^;"]+)?/);
+      if (m) {
+        return m[1];
+      }
+      return '';
     }
     function getTargetLines(body, searchRegex) {
       var lines = body.split('\n');
