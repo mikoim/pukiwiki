@@ -397,7 +397,17 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       }
       return false;
     }
+    function isEnableServerFunctions() {
+      var propsDiv = document.getElementById('pukiwiki-site-properties');
+      if (!propsDiv) return false;
+      var jsonE = propsDiv.querySelector('div[data-key="site-props"]');
+      if (!jsonE) return false;
+      var props = JSON.parse(jsonE.dataset.value);
+      if (props.json_enabled) return true;
+      return false;
+    }
     if (! isEnabledFetchFunctions()) return;
+    if (! isEnableServerFunctions()) return;
     replaceSearchWithSearch2();
     hookSearch2();
     removeEncodeHint();
