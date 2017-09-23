@@ -29,6 +29,9 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       if (searchText) {
         url += '&q=' + encodeURIComponent(searchText);
       }
+      if (session.base) {
+        url += '&base=' + encodeURIComponent(session.base);
+      }
       url += '&start=' + startIndex;
       fetch (url
       ).then(function(response){
@@ -307,13 +310,18 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       }
     }
     function kickFirstSearch() {
-      var searchText = document.querySelector('#_plugin_search2_searchtext');
+      var form = document.querySelector('._plugin_search2_form');
+      var searchText = form && form.q;
       if (!searchText) return;
       if (searchText && searchText.value) {
         var e = document.querySelector('#_plugin_search2_msg_searching');
         var msg = e && e.value || 'Searching...';
         setSearchStatus(msg);
-        doSearch(searchText.value, {}, 0);
+        var base = '';
+        forEach(form.querySelectorAll('input[name="base"]'), function(radio){
+          if (radio.checked) base = radio.value;
+        });
+        doSearch(searchText.value, {base: base}, 0);
       }
     }
     function setSearchStatus(statusText) {
@@ -336,13 +344,16 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         if (f.action.match(/cmd=search$/)) {
           f.addEventListener('submit', function(e) {
             var q = e.target.word.value;
-            var base = e.target && e.target.base && e.target.base.value;
+            var base = '';
+            forEach(f.querySelectorAll('input[name="base"]'), function(radio){
+              if (radio.checked) base = radio.value;
+            });
             var loc = document.location;
             var url = loc.protocol + '//' + loc.host + loc.pathname +
               '?cmd=search2' +
-              (base ? '&base=' + encodeURIComponent(base) : '') +
-              '&q=' + encodeSearthText(q);
-            e.preventDefault();
+              '&q=' + encodeSearthText(q) +
+              (base ? '&base=' + encodeURIComponent(base) : '');
+              e.preventDefault();
             setTimeout(function() {
               location.href = url;
             }, 1);
@@ -355,7 +366,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             } else if (radio.value === 'OR') {
               radio.addEventListener('click', onOrRadioClick);
             }
-          });;
+          });
           function onAndRadioClick(e) {
             var sp = removeSearchOperators(f.word.value).split(/\s+/);
             var newText = sp.join(' ');

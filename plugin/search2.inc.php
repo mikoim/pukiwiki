@@ -174,25 +174,24 @@ function plugin_search2_search_form($s_word = '', $type = '', $bases = array())
 	if (!empty($bases)) {
 		$base_msg = '';
 		$_num = 0;
-		$check = ' checked="checked"';
+		$check = ' checked';
 		foreach($bases as $base) {
 			++$_num;
-			if (PLUGIN_SEARCH_MAX_BASE < $_num) break;
-			$label_id = '_p_search_base_id_' . $_num;
+			if (PLUGIN_SEARCH2_MAX_BASE < $_num) break;
 			$s_base   = htmlsc($base);
 			$base_str = '<strong>' . $s_base . '</strong>';
 			$base_label = str_replace('$1', $base_str, $_search_pages);
 			$base_msg  .=<<<EOD
  <div>
-  <input type="radio" name="base" id="$label_id" value="$s_base" $check />
-  <label for="$label_id">$base_label</label>
+  <label>
+   <input type="radio" name="base" value="$s_base" $check> $base_label
+  </label>
  </div>
 EOD;
 			$check = '';
 		}
 		$base_msg .=<<<EOD
-  <input type="radio" name="base" id="_p_search_base_id_all" value="" />
-  <label for="_p_search_base_id_all">$_search_all</label>
+<label><input type="radio" name="base" value=""> $_search_all</label>
 EOD;
 		$base_option = '<div class="small">' . $base_msg . '</div>';
 	}
@@ -213,10 +212,10 @@ EOD;
 	}
 
 	return <<<EOD
-<form action="$script" method="GET">
+<form action="$script" method="GET" class="_plugin_search2_form">
  <div>
   <input type="hidden" name="cmd" value="search2">
-  <input type="search"  name="q" id="_plugin_search2_searchtext" value="$h_search_text" size="30">
+  <input type="search"  name="q" value="$h_search_text" size="30">
   <input type="submit" value="$_btn_search">
  </div>
 $base_option
