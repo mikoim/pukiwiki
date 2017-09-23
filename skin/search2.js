@@ -322,9 +322,17 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         statusObj.textContent = statusText;
       }
     }
+    function forEach(nodeList, func) {
+      if (nodeList.forEach) {
+        nodeList.forEach(func);
+      } else {
+        for (var i = 0, n = nodeList.length; i < n; i++) {
+          func(nodeList[i], i);
+        }
+      }
+    }
     function replaceSearchWithSearch2() {
-      var forms = document.querySelectorAll('form');
-      forms.forEach(function(f){
+      forEach(document.querySelectorAll('form'), function(f){
         if (f.action.match(/cmd=search$/)) {
           f.addEventListener('submit', function(e) {
             var q = e.target.word.value;
@@ -340,7 +348,8 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             }, 1);
             return false;
           });
-          f.querySelectorAll('input[type="radio"][name="type"]').forEach(function(radio){
+          var radios = f.querySelectorAll('input[type="radio"][name="type"]');
+          forEach(radios, function(radio){
             if (radio.value === 'AND') {
               radio.addEventListener('click', onAndRadioClick);
             } else if (radio.value === 'OR') {
