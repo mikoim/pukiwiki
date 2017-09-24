@@ -11,6 +11,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
     var maxResultLines = 20;
     var minBlockLines = 5;
     var minSearchWaitMilliseconds = 100;
+    var kanaMap = null;
     function escapeHTML (s) {
       if(typeof s !== 'string') {
         s = '' + s;
@@ -173,16 +174,70 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         }, interval);
       }
     }
+    function prepareKanaMap() {
+      if (kanaMap !== null) return;
+      var dakuten = '\uFF9E';
+      var maru = '\uFF9F';
+      var map = {};
+      for (var c = 0xFF61; c <=0xFF9F; c++) {
+        var han = String.fromCharCode(c);
+        var zen = han.normalize('NFKC');
+        map[zen] = han;
+        var hanDaku = han + dakuten;
+        var zenDaku = hanDaku.normalize('NFKC');
+        if (zenDaku.length === 1) { // +Handaku-ten OK
+            map[zenDaku] = hanDaku;
+        }
+        var hanMaru = han + maru;
+        var zenMaru = hanMaru.normalize('NFKC');
+        if (zenMaru.length === 1) { // +Maru OK
+            map[zenMaru] = hanMaru;
+        }
+      }
+      kanaMap = map;
+    }
     function textToRegex(searchText) {
       var regEscape = /[\\^$.*+?()[\]{}|]/g;
+      //             1:Symbol             2:Katakana        3:Hiragana
+      var regRep = /([\\^$.*+?()[\]{}|])|([\u30a1-\u30f6])|([\u3041-\u3096])/g;
       var s1 = searchText.replace(/^\s+|\s+$/g, '');
       var sp = s1.split(/\s+/);
       var rText = '';
+      prepareKanaMap();
       for (var i = 0; i < sp.length; i++) {
         if (rText !== '') {
           rText += '|'
         }
-        rText += '(' + sp[i].replace(regEscape, '\\$&') + ')';
+        var s = sp[i];
+        if (s.normalize) {
+          s = s.normalize('NFKC');
+        }
+        var s2 = s.replace(regRep, function(m, m1, m2, m3){
+          if (m1) {
+            // Symbol - escape with prior backslach
+            return '\\' + m1;
+          } else if (m2) {
+            // Katakana
+            var r = '(?:' + String.fromCharCode(m2.charCodeAt(0) - 0x60) +
+              '|' + m2;
+            if (kanaMap[m2]) {
+              r += '|' + kanaMap[m2];
+            }
+            r += ')';
+            return r;
+          } else if (m3) {
+            // Hiragana
+            var katakana = String.fromCharCode(m3.charCodeAt(0) + 0x60);
+            var r = '(?:' + m3 + '|' + katakana;
+            if (kanaMap[katakana]) {
+              r += '|' + kanaMap[katakana];
+            }
+            r += ')';
+            return r;
+          }
+          return m;
+        });
+        rText += '(' + s2 + ')';
       }
       return new RegExp(rText, 'ig');
     }
