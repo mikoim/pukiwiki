@@ -176,6 +176,10 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
     }
     function prepareKanaMap() {
       if (kanaMap !== null) return;
+      if (!String.prototype.normalize) {
+        kanaMap = {};
+        return;
+      }
       var dakuten = '\uFF9E';
       var maru = '\uFF9F';
       var map = {};
