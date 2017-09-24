@@ -148,14 +148,23 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         } else {
           updatedAt = val.updated_at;
         }
-        li.innerHTML = '<a href="' + href + '">' + decoratedName + '</a> ' + getPassage(now, updatedAt);
+        var liHtml = '<a href="' + href + '">' + decoratedName + '</a> ' +
+          getPassage(now, updatedAt);
+        li.innerHTML = liHtml;
         fragment.appendChild(li);
+        var div = document.createElement('div');
+        div.classList.add('search-result-detail');
+        var head = document.createElement('div');
+        head.classList.add('search-result-page-summary');
+        head.innerHTML = escapeHTML(getBodySummary(val.body));
+        div.appendChild(head);
         var summary = getSummary(val.body, searchRegex);
         for (var i = 0; i < summary.length; i++) {
           var pre = document.createElement('pre');
           pre.innerHTML = summary[i].lines.join('\n');
-          fragment.appendChild(pre);
+          div.appendChild(pre);
         }
+        fragment.appendChild(div);
         ul.appendChild(fragment);
       });
       if (!obj.search_done && obj.next_start_index) {
@@ -361,6 +370,40 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
           q.focus();
         }
       }
+    }
+    function getBodySummary(body) {
+      var lines = body.split('\n');
+      var isInAuthorHeader = true;
+      var summary = [];
+      var lineCount = 0;
+      for (var index = 0, length = lines.length; index < length; index++) {
+        var line = lines[index];
+        if (isInAuthorHeader) {
+          // '#author line is not search target'
+          if (line.match(/^#author\(/)) {
+            // Remove this line from search target
+            continue;
+          } else if (line.match(/^#freeze(\W|$)/)) {
+            continue;
+            // Still in header
+          } else {
+            // Already in body
+            isInAuthorHeader = false;
+          }
+        }
+        line = line.replace(/^\s+|\s+$/g, '');
+        if (line.length === 0) continue; // Empty line
+        if (line.match(/^#\w+/)) continue; // Block-type plugin
+        if (line.match(/^\/\//)) continue; // Comment
+        if (line.substr(0, 1) === '*') {
+          line = line.replace(/\s*\[\#\w+\]$/, ''); // Remove anchor
+        }
+        summary.push(line);
+        if (summary.length >= 10) {
+          continue;
+        }
+      }
+      return summary.join(' ').substring(0, 150);
     }
     function removeEncodeHint() {
       var form = document.querySelector('form');
