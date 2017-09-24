@@ -136,7 +136,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       results.forEach(function(val, index) {
         var fragment = document.createDocumentFragment();
         var li = document.createElement('li');
-        var href = val.url;
+        var href = val.url + '#q=' + encodeSearchTextForHash(searchText);
         var decoratedName = findAndDecorateText(val.name, searchRegex);
         if (! decoratedName) {
           decoratedName = escapeHTML(val.name);
@@ -148,7 +148,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         } else {
           updatedAt = val.updated_at;
         }
-        var liHtml = '<a href="' + href + '">' + decoratedName + '</a> ' +
+        var liHtml = '<a href="' + escapeHTML(href) + '">' + decoratedName + '</a> ' +
           getPassage(now, updatedAt);
         li.innerHTML = liHtml;
         fragment.appendChild(li);
@@ -210,6 +210,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       kanaMap = map;
     }
     function textToRegex(searchText) {
+      if (!searchText) return null;
       var regEscape = /[\\^$.*+?()[\]{}|]/g;
       //             1:Symbol             2:Katakana        3:Hiragana
       var regRep = /([\\^$.*+?()[\]{}|])|([\u30a1-\u30f6])|([\u3041-\u3096])/g;
@@ -336,29 +337,6 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       return blocks;
       //return foundLines.join('\n');
     }
-    function findAndDecorateText(text, searchRegex) {
-      var isReplaced = false;
-      var lastIndex = 0;
-      var m;
-      var decorated = '';
-      searchRegex.lastIndex = 0;
-      while ((m = searchRegex.exec(text)) !== null) {
-        isReplaced = true;
-        var pre = text.substring(lastIndex, m.index);
-        decorated += escapeHTML(pre);
-        for (var i = 1; i < m.length; i++) {
-          if (m[i]) {
-            decorated += '<strong class="word' + (i - 1) + '">' + escapeHTML(m[i]) + '</strong>'
-          }
-        }
-        lastIndex = searchRegex.lastIndex;
-      }
-      if (isReplaced) {
-        decorated += escapeHTML(text.substr(lastIndex));
-        return decorated;
-      }
-      return null;
-    }
     function getSummary(bodyText, searchRegex) {
       return getTargetLines(bodyText, searchRegex);
     }
@@ -453,7 +431,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             var loc = document.location;
             var url = loc.protocol + '//' + loc.host + loc.pathname +
               '?cmd=search2' +
-              '&q=' + encodeSearthText(q) +
+              '&q=' + encodeSearchText(q) +
               (base ? '&base=' + encodeURIComponent(base) : '');
               e.preventDefault();
             setTimeout(function() {
@@ -485,13 +463,84 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
           }
         }
       });
-      function encodeSearthText(q) {
-        var sp = q.split(/\s+/);
-        for (var i = 0; i < sp.length; i++) {
-          sp[i] = encodeURIComponent(sp[i]);
-        }
-        return sp.join('+');
+    }
+    function encodeSearchText(q) {
+      var sp = q.split(/\s+/);
+      for (var i = 0; i < sp.length; i++) {
+        sp[i] = encodeURIComponent(sp[i]);
       }
+      return sp.join('+');
+    }
+    function encodeSearchTextForHash(q) {
+      var sp = q.split(/\s+/);
+      return sp.join('+');
+    }
+    function findAndDecorateText(text, searchRegex) {
+      var isReplaced = false;
+      var lastIndex = 0;
+      var m;
+      var decorated = '';
+      searchRegex.lastIndex = 0;
+      while ((m = searchRegex.exec(text)) !== null) {
+        isReplaced = true;
+        var pre = text.substring(lastIndex, m.index);
+        decorated += escapeHTML(pre);
+        for (var i = 1; i < m.length; i++) {
+          if (m[i]) {
+            decorated += '<strong class="word' + (i - 1) + '">' + escapeHTML(m[i]) + '</strong>'
+          }
+        }
+        lastIndex = searchRegex.lastIndex;
+      }
+      if (isReplaced) {
+        decorated += escapeHTML(text.substr(lastIndex));
+        return decorated;
+      }
+      return null;
+    }
+    function getSearchTextInLocationHash() {
+      // TODO Cross browser
+      var hash = location.hash;
+      var q = '';
+      if (hash.substr(0, 3) === '#q=') {
+        q = hash.substr(3).replace(/\+/g, ' ');
+      }
+      return q;
+    }
+    function colorSearchTextInBody() {
+      var searchText = getSearchTextInLocationHash();
+      if (!searchText) return;
+      var searchRegex = textToRegex(removeSearchOperators(searchText));
+      var headReText = '([\\s\\b]|^)';
+      var tailReText = '\\b';
+      var ignoreTags = ['INPUT', 'TEXTAREA', 'BUTTON',
+        'SCRIPT', 'FRAME', 'IFRAME'];
+      function colorSearchText(element, searchRegex) {
+        var decorated = findAndDecorateText(element.nodeValue, searchRegex);
+        if (decorated) {
+          var span = document.createElement('span');
+          span.innerHTML = decorated;
+          element.parentNode.replaceChild(span, element);
+        }
+      }
+      function walkElement(element) {
+        var e = element.firstChild;
+        while (e) {
+          if (e.nodeType == 3 && e.nodeValue &&
+              e.nodeValue.length >= 2 && /\S/.test(e.nodeValue)) {
+            var next = e.nextSibling;
+            colorSearchText(e, searchRegex);
+            e = next;
+          } else {
+            if (e.nodeType == 1 && ignoreTags.indexOf(e.tagName) == -1) {
+              walkElement(e);
+            }
+            e = e.nextSibling;
+          }
+        }
+      }
+      var target = document.getElementById('body');
+      walkElement(target);
     }
     function isEnabledFetchFunctions() {
       if (window.fetch && document.querySelector) {
@@ -508,6 +557,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       if (props.json_enabled) return true;
       return false;
     }
+    colorSearchTextInBody();
     if (! isEnabledFetchFunctions()) return;
     if (! isEnableServerFunctions()) return;
     replaceSearchWithSearch2();
