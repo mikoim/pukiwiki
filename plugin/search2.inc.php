@@ -166,6 +166,7 @@ function plugin_search2_search_form($s_word = '', $type = '', $bases = array())
 	global $_search_pages, $_search_all;
 	global $_msg_andresult, $_msg_orresult, $_msg_notfoundresult;
 	global $_search_detail, $_search_searching;
+	global $_msg_unsupported_webbrowser, $_msg_use_alternative_link;
 
 	$script = get_base_uri();
 	$h_search_text = htmlsc($s_word);
@@ -211,7 +212,15 @@ EOD;
 		$result_page_panel = '';
 	}
 
+	$plain_search_link = '<a href="' . $script . '?cmd=search' . '">' . htmlsc($_btn_search) . '</a>';
+	$alt_msg = str_replace('$1', $plain_search_link, $_msg_use_alternative_link);
 	return <<<EOD
+<noscript>
+ <p>$_msg_unsupported_webbrowser $alt_msg</p>
+</noscript>
+<p class="_plugin_search2_nosupport_message" style="display:block;">
+  $_msg_unsupported_webbrowser $alt_msg
+</p>
 <form action="$script" method="GET" class="_plugin_search2_form">
  <div>
   <input type="hidden" name="cmd" value="search2">

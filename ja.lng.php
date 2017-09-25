@@ -55,6 +55,8 @@ $_msg_help           = 'テキスト整形のルールを表示する';
 $_msg_week           = array('日','月','火','水','木','金','土');
 $_msg_content_back_to_top = '<div class="jumpmenu"><a href="#navigator">&uarr;</a></div>';
 $_msg_word           = 'これらのキーワードがハイライトされています：';
+$_msg_unsupported_webbrowser = 'この機能はお使いのWebブラウザには対応していません。';
+$_msg_use_alternative_link = 'リンク先の機能をご利用ください: $1';
 
 ///////////////////////////////////////
 // Symbols

@@ -53,6 +53,8 @@ $_msg_help        = 'View Text Formatting Rules';
 $_msg_week        = array('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
 $_msg_content_back_to_top = '<div class="jumpmenu"><a href="#navigator">&uarr;</a></div>';
 $_msg_word        = 'These search terms have been highlighted:';
+$_msg_unsupported_webbrowser = 'This function doesn\'t support your current Web browser.';
+$_msg_use_alternative_link = 'Please go to the following link destination: $1';
 
 ///////////////////////////////////////
 // Symbols

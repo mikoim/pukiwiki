@@ -553,8 +553,15 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       var target = document.getElementById('body');
       walkElement(target);
     }
+    function showNoSupportMessage() {
+      var pList = document.getElementsByClassName('_plugin_search2_nosupport_message');
+      for (var i = 0; i < pList.length; i++) {
+        var p = pList[i];
+        p.style.display = 'block';
+      }
+    }
     function isEnabledFetchFunctions() {
-      if (window.fetch && document.querySelector) {
+      if (window.fetch && document.querySelector && window.JSON) {
         return true;
       }
       return false;
@@ -569,7 +576,10 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       return false;
     }
     colorSearchTextInBody();
-    if (! isEnabledFetchFunctions()) return;
+    if (! isEnabledFetchFunctions()) {
+      showNoSupportMessage();
+      return;
+    }
     if (! isEnableServerFunctions()) return;
     replaceSearchWithSearch2();
     hookSearch2();
