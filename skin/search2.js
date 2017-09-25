@@ -564,7 +564,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       if (!propsDiv) return false;
       var jsonE = propsDiv.querySelector('div[data-key="site-props"]');
       if (!jsonE) return false;
-      var props = JSON.parse(jsonE.dataset.value);
+      var props = JSON.parse(jsonE.getAttribute('data-value'));
       if (props.json_enabled) return true;
       return false;
     }
