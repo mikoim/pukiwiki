@@ -218,7 +218,7 @@ EOD;
 <noscript>
  <p>$_msg_unsupported_webbrowser $alt_msg</p>
 </noscript>
-<p class="_plugin_search2_nosupport_message" style="display:block;">
+<p class="_plugin_search2_nosupport_message" style="display:none;">
   $_msg_unsupported_webbrowser $alt_msg
 </p>
 <form action="$script" method="GET" class="_plugin_search2_form">

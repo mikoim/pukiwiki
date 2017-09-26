@@ -206,7 +206,7 @@ function get_html_scripting_data()
 	if (!isset($ticket_link_sites) || !is_array($ticket_link_sites)) {
 		return '';
 	}
-	$is_utf8 = SOURCE_ENCODING === 'UTF-8';
+	$is_utf8 = (bool)defined('PKWK_UTF8_ENABLE');
 	// Require: PHP 5.4+
 	$json_enabled = defined('JSON_UNESCAPED_UNICODE');
 	if (!$json_enabled) {
