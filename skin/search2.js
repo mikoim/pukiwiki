@@ -21,12 +21,14 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
           '&': '&amp;',
           '"': '&quot;',
           '<': '&lt;',
-          '>': '&gt;',
+          '>': '&gt;'
         }[m];
       });
     }
     function doSearch(searchText, session, startIndex) {
       var url = './?cmd=search2&action=query';
+      var props = getSiteProps();
+      url += '&encode_hint=\u3077';
       if (searchText) {
         url += '&q=' + encodeURIComponent(searchText);
       }

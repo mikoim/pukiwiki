@@ -44,6 +44,7 @@ function plugin_search2_action()
 		}
 	} else if ($action === 'query') {
 		$text = isset($vars['q']) ? $vars['q'] : '';
+		header('Content-Type: application/json; charset=UTF-8');
 		plugin_search2_do_search($text, $base, $start_index);
 		exit;
 	}
@@ -157,7 +158,15 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 		'next_start_index' => $readable_page_index + 1,
 		'search_done' => $search_done,
 		'results' => $found_pages);
-	print(json_encode($result_obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+	$obj = $result_obj;
+	if (!defined('PKWK_UTF8_ENABLE')) {
+		if (SOURCE_ENCODING === 'EUC-JP') {
+			mb_convert_variables('UTF-8', 'CP51932', $obj);
+		} else {
+			mb_convert_variables('UTF-8', SOURCE_ENCODING, $obj);
+		}
+	}
+	print(json_encode(obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
 function plugin_search2_search_form($s_word = '', $type = '', $bases = array())
