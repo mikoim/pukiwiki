@@ -166,7 +166,7 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 			mb_convert_variables('UTF-8', SOURCE_ENCODING, $obj);
 		}
 	}
-	print(json_encode(obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+	print(json_encode($obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
 function plugin_search2_search_form($s_word = '', $type = '', $bases = array())

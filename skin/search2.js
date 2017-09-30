@@ -28,7 +28,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
     function doSearch(searchText, session, startIndex) {
       var url = './?cmd=search2&action=query';
       var props = getSiteProps();
-      url += '&encode_hint=\u3077';
+      url += '&encode_hint=' + encodeURIComponent('\u3077');
       if (searchText) {
         url += '&q=' + encodeURIComponent(searchText);
       }
@@ -451,7 +451,8 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
               baseUri = props.base_uri_pathname;
             }
             var url = baseUri + '?' +
-              (props.is_utf8 ? '' : 'encode_hint=\u3077' + '&') +
+              (props.is_utf8 ? '' : 'encode_hint=' +
+                encodeURIComponent('\u3077') + '&') +
               'cmd=search2' +
               '&q=' + encodeSearchText(q) +
               (base ? '&base=' + encodeURIComponent(base) : '');
