@@ -36,25 +36,31 @@ function plugin_search2_action()
 		$q = isset($vars['q']) ? $vars['q'] : '';
 		if ($q === '') {
 			return array('msg' => $_title_search,
-				'body' => plugin_search2_search_form($q, '', $bases));
+				'body' => plugin_search2_search_form($q, $bases));
 		} else {
 			$msg  = str_replace('$1', htmlsc($q), $_title_result);
 			return array('msg' => $msg,
-					'body' => plugin_search2_search_form($q, '', $bases));
+					'body' => plugin_search2_search_form($q, $bases));
 		}
 	} else if ($action === 'query') {
 		$text = isset($vars['q']) ? $vars['q'] : '';
+		$search_start_time = isset($vars['search_start_time']) ?
+			$vars['search_start_time'] : null;
+		$modified_since = (int)(isset($vars['modified_since']) ?
+			$vars['modified_since'] : '0');
 		header('Content-Type: application/json; charset=UTF-8');
-		plugin_search2_do_search($text, $base, $start_index);
+		plugin_search2_do_search($text, $base, $start_index,
+			$search_start_time, $modified_since);
 		exit;
 	}
 }
 
-function plugin_search2_do_search($query_text, $base, $start_index)
+function plugin_search2_do_search($query_text, $base, $start_index,
+	$search_start_time, $modified_since)
 {
 	global $whatsnew, $non_list, $search_non_list;
 	global $_msg_andresult, $_msg_orresult, $_msg_notfoundresult;
-	global $search_auth;
+	global $search_auth, $auth_user;
 
 	$result_record_limit = $start_index === 0 ?
 		PLUGIN_SEARCH2_RESULT_RECORD_LIMIT_START : PLUGIN_SEARCH2_RESULT_RECORD_LIMIT;
@@ -73,20 +79,43 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 	foreach ($keys as $key=>$value)
 		$keys[$key] = '/' . $value . '/S';
 
-	$pages = get_existpages();
+	if ($modified_since > 0) {
+		// Recent search
+		$recent_files = get_recent_files();
+		$modified_loc = $modified_since - LOCALZONE;
+		$pages = array();
+		foreach ($recent_files as $p => $time) {
+			if ($time >= $modified_loc) {
+				$pages[] = $p;
+			}
+		}
+		if ($base != '') {
+			$pages = preg_grep('/^' . preg_quote($base, '/') . '/S', $pages);
+		}
+		natsort($pages);
+		$page_names = $pages;
+	} else {
+		// Normal search
+		$pages = get_existpages();
 
-	// Avoid
-	if ($base != '') {
-		$pages = preg_grep('/^' . preg_quote($base, '/') . '/S', $pages);
+		// Avoid
+		if ($base != '') {
+			$pages = preg_grep('/^' . preg_quote($base, '/') . '/S', $pages);
+		}
+		if (! $search_non_list) {
+			$pages = array_diff($pages, preg_grep('/' . $non_list . '/S', $pages));
+		}
+		natsort($pages);
+		$pages = array_flip($pages);
+		unset($pages[$whatsnew]);
+		$page_names = array_keys($pages);
 	}
-	if (! $search_non_list) {
-		$pages = array_diff($pages, preg_grep('/' . $non_list . '/S', $pages));
-	}
-	natsort($pages);
-	$pages = array_flip($pages);
-	unset($pages[$whatsnew]);
-	$page_names = array_keys($pages);
 
+	// Cache collabolate
+	if (is_null($search_start_time)) {
+		// Don't use client cache
+		$search_start_time = UTIME + LOCALZONE;
+	}
 	$found_pages = array();
 	$readable_page_index = -1;
 	$scan_page_index = -1;
@@ -121,19 +150,24 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 		}
 		if ($b_match) {
 			// Found!
-			$filemtime = null;
 			$author_info = get_author_info($body);
-			if ($author_info === false || $pagename_only) {
-				$updated_at = get_date_atom(filemtime(get_filename($page)));
+			if ($author_info) {
+				$updated_at = get_update_datetime_from_author($author_info);
+				$updated_time = strtotime($updated_at);
+			} else {
+				$updated_time = filemtime(get_filename($page));
+				$updated_at = get_date_atom($updated_time);
 			}
 			if ($pagename_only) {
 				// The user cannot read this page body
 				$found_pages[] = array('name' => (string)$page,
 					'url' => get_page_uri($page), 'updated_at' => $updated_at,
+					'updated_time' => $updated_time,
 					'body' => '', 'pagename_only' => 1);
 			} else {
 				$found_pages[] = array('name' => (string)$page,
 					'url' => get_page_uri($page), 'updated_at' => $updated_at,
+					'updated_time' => $updated_time,
 					'body' => (string)$body);
 			}
 		}
@@ -157,6 +191,8 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 		'last_read_page_name' => $last_read_page_name,
 		'next_start_index' => $readable_page_index + 1,
 		'search_done' => $search_done,
+		'search_start_time' => $search_start_time,
+		'auth_user' => $auth_user,
 		'results' => $found_pages);
 	$obj = $result_obj;
 	if (!defined('PKWK_UTF8_ENABLE')) {
@@ -169,16 +205,19 @@ function plugin_search2_do_search($query_text, $base, $start_index)
 	print(json_encode($obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
-function plugin_search2_search_form($s_word = '', $type = '', $bases = array())
+function plugin_search2_search_form($search_text = '', $bases = array())
 {
 	global $_btn_search;
 	global $_search_pages, $_search_all;
 	global $_msg_andresult, $_msg_orresult, $_msg_notfoundresult;
 	global $_search_detail, $_search_searching;
 	global $_msg_unsupported_webbrowser, $_msg_use_alternative_link;
+	global $auth_user;
 
+	static $search2_form_total_count = 0;
+	$search2_form_total_count++;
 	$script = get_base_uri();
-	$h_search_text = htmlsc($s_word);
+	$h_search_text = htmlsc($search_text);
 
 	$base_option = '';
 	if (!empty($bases)) {
@@ -210,12 +249,10 @@ EOD;
 	$_search2_search_wait_milliseconds = PLUGIN_SEARCH2_SEARCH_WAIT_MILLISECONDS;
 	$result_page_panel =<<<EOD
 <input type="checkbox" id="_plugin_search2_detail" checked><label for="_plugin_search2_detail">$_search_detail</label>
-<input type="hidden" id="_plugin_search2_msg_searching" value="$_search_searching">
-<input type="hidden" id="_plugin_search2_msg_result_notfound" value="$_search2_result_notfound">
-<input type="hidden" id="_plugin_search2_msg_result_found" value="$_search2_result_found">
-<input type="hidden" id="_search2_search_wait_milliseconds" value="$_search2_search_wait_milliseconds">
+<ul id="result-list">
+</ul>
 EOD;
-	if ($h_search_text == '') {
+	if ($h_search_text == '' || $search2_form_total_count > 1) {
 		$result_page_panel = '';
 	}
 
@@ -225,7 +262,7 @@ EOD;
 <form action="$script" method="GET" class="_plugin_search2_form">
  <div>
   <input type="hidden" name="cmd" value="search2">
-  <input type="search"  name="q" value="$h_search_text" size="30">
+  <input type="search" name="q" value="$h_search_text" data-original-q="$h_search_text" size="30">
   <input type="submit" value="$_btn_search">
  </div>
 $base_option
@@ -239,6 +276,19 @@ $form
 </div>
 EOD;
 
+	$h_auth_user = htmlsc($auth_user);
+	$search_props =<<<EOD
+<div style="display:none;">
+  <input type="hidden" id="_plugin_search2_auth_user" value="$h_auth_user">
+  <input type="hidden" id="_plugin_search2_msg_searching" value="$_search_searching">
+  <input type="hidden" id="_plugin_search2_msg_result_notfound" value="$_search2_result_notfound">
+  <input type="hidden" id="_plugin_search2_msg_result_found" value="$_search2_result_found">
+  <input type="hidden" id="_search2_search_wait_milliseconds" value="$_search2_search_wait_milliseconds">
+</div>
+EOD;
+	if ($search2_form_total_count > 1) {
+		$search_props = '';
+	}
 
 	return <<<EOD
 <noscript>
@@ -247,12 +297,11 @@ EOD;
 <p class="_plugin_search2_nosupport_message" style="display:none;">
   $_msg_unsupported_webbrowser $alt_msg
 </p>
+$search_props
 $form
 <div class="_plugin_search2_search_status"></div>
 <div class="_plugin_search2_message"></div>
 $result_page_panel
-<ul id="result-list">
-</ul>
 $second_form
 EOD;
 }

@@ -25,9 +25,8 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         }[m];
       });
     }
-    function doSearch(searchText, session, startIndex) {
+    function doSearch(searchText, session, startIndex, searchStartTime, prevTimestamp) {
       var url = './?cmd=search2&action=query';
-      var props = getSiteProps();
       url += '&encode_hint=' + encodeURIComponent('\u3077');
       if (searchText) {
         url += '&q=' + encodeURIComponent(searchText);
@@ -35,8 +34,15 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       if (session.base) {
         url += '&base=' + encodeURIComponent(session.base);
       }
-      url += '&start=' + startIndex;
-      fetch (url
+      if (prevTimestamp) {
+        url += '&modified_since=' + prevTimestamp;
+      } else {
+        url += '&start=' + startIndex;
+        if (searchStartTime) {
+          url += '&search_start_time=' + encodeURIComponent(searchStartTime);
+        }
+      }
+      fetch(url, {credentials: 'same-origin'}
       ).then(function(response){
         if (response.ok) {
           return response.json();
@@ -45,7 +51,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             + response.statusText + ' on ' + url);
         }
       }).then(function(obj) {
-        showResult(obj, session, searchText);
+        showResult(obj, session, searchText, prevTimestamp);
       })['catch'](function(err){
         console.log(err);
         console.log('Error! Please check JavaScript console' + '\n' + JSON.stringify(err) + '|' + err);
@@ -89,28 +95,132 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       }
       return sp.join(' ');
     }
-    function showResult(obj, session, searchText) {
+    function getSearchCacheKeyBase(pathname) {
+      return 'path.' + pathname + '.search2.';
+    }
+    function getSearchCacheKey(pathname, searchText) {
+      var now = new Date();
+      var dateKey = now.getFullYear() + '_0' + (now.getMonth() + 1) + '_0' + now.getDate();
+      dateKey = dateKey.replace(/_\d?(\d\d)/g, '$1');
+      return getSearchCacheKeyBase(pathname) + dateKey + '.' + searchText;
+    }
+    function showResult(obj, session, searchText, prevTimestamp) {
+      var props = getSiteProps();
       var searchRegex = textToRegex(removeSearchOperators(searchText));
       var ul = document.querySelector('#result-list');
       if (!ul) return;
-      if (obj.start_index === 0) {
+      if (obj.start_index === 0 && !prevTimestamp) {
         ul.innerHTML = '';
       }
-      if (! session.scan_page_count) session.scan_page_count = 0;
-      if (! session.read_page_count) session.read_page_count = 0;
-      if (! session.hit_page_count) session.hit_page_count = 0;
-      var prevHitPageCount = session.hit_page_count;
-      session.scan_page_count += obj.scan_page_count;
-      session.read_page_count += obj.read_page_count;
-      session.hit_page_count += obj.results.length;
-      session.page_count = obj.page_count;
-      if (prevHitPageCount === 0 && session.hit_page_count > 0) {
-        var div = document.querySelector('._plugin_search2_second_form');
-        if (div) {
-          div.style.display = 'block';
+      var searchDone = obj.search_done;
+      if (! session.scanPageCount) session.scanPageCount = 0;
+      if (! session.readPageCount) session.readPageCount = 0;
+      if (! session.hitPageCount) session.hitPageCount = 0;
+      var prevHitPageCount = session.hitPageCount;
+      if (prevTimestamp) {
+        session.hitPageCount += obj.results.length;
+      } else {
+        session.scanPageCount += obj.scan_page_count;
+        session.readPageCount += obj.read_page_count;
+        session.hitPageCount += obj.results.length;
+        session.pageCount = obj.page_count;
+      }
+      session.searchStartTime = obj.search_start_time;
+      session.authUser = obj.auth_user;
+      if (prevHitPageCount === 0 && session.hitPageCount > 0) {
+        showSecondSearchForm();
+      }
+      showSearchResultMessage(session, searchText, searchRegex, !searchDone);
+      var progress = ' (read:' + session.readPageCount + ', scanned:' +
+        session.scanPageCount + ', all:' + session.pageCount + ')';
+      var e = document.querySelector('#_plugin_search2_msg_searching');
+      var msg = e && e.value || 'Searching...';
+      setSearchStatus(msg + progress);
+      if (searchDone) {
+        setTimeout(function(){
+          setSearchStatus('');
+        }, 5000);
+      }
+      var results = obj.results;
+      var cachedResults = [];
+      results.forEach(function(val, index) {
+        var cache = {};
+        cache.name = val.name;
+        cache.url = val.url;
+        cache.updatedAt = val.updated_at;
+        cache.updatedTime = val.updated_time;
+        cache.bodySummary = getBodySummary(val.body);
+        cache.hitSummary = getSummaryInfo(val.body, searchRegex);
+        cachedResults.push(cache);
+      });
+      if (session.results) {
+        if (prevTimestamp) {
+          var newResult = [].concat(cachedResults);
+          Array.prototype.push.apply(newResult, session.results);
+          session.results = newResult;
+        } else {
+          Array.prototype.push.apply(session.results, cachedResults);
+        }
+      } else {
+        session.results = cachedResults;
+      }
+      addSearchResult(cachedResults, searchText, searchRegex, ul, prevTimestamp);
+      if (searchDone) {
+        session.searchText = searchText;
+        var json = JSON.stringify(session);
+        var key = getSearchCacheKey(props.base_uri_pathname, searchText);
+        if (window.localStorage) {
+          localStorage[key] = json;
         }
       }
-      var msg = obj.message;
+      if (!searchDone && obj.next_start_index) {
+        var waitE = document.querySelector('#_search2_search_wait_milliseconds');
+        var interval = minSearchWaitMilliseconds;
+        try {
+          interval = parseInt(waitE.value);
+        } catch (e) {
+          interval = minSearchWaitMilliseconds;
+        }
+        if (interval < minSearchWaitMilliseconds) {
+          interval = minSearchWaitMilliseconds;
+        }
+        setTimeout(function(){
+          doSearch(searchText, session, obj.next_start_index,
+            obj.search_start_time);
+        }, interval);
+      }
+    }
+    function showCachedResult(searchText, base) {
+      var props = getSiteProps();
+      var searchRegex = textToRegex(removeSearchOperators(searchText));
+      var ul = document.querySelector('#result-list');
+      if (!ul) return null;
+      var searchCacheKey = getSearchCacheKey(props.base_uri_pathname, searchText);
+      var cache1 = localStorage[searchCacheKey];
+      if (!cache1) {
+        return null;
+      }
+      var base = getSearchBase(null);
+      var session = JSON.parse(cache1);
+      if (!session) return null;
+      if (base != session.base) {
+        return null;
+      }
+      var userE = document.getElementById('_plugin_search2_auth_user');
+      var user = userE && userE.value;
+      if (user != session.authUser) {
+        return null;
+      }
+      if (session.hitPageCount > 0) {
+        showSecondSearchForm();
+      }
+      showSearchResultMessage(session, searchText, searchRegex, false);
+      setSearchStatus('');
+      addSearchResult(session.results, searchText, searchRegex, ul);
+      return session;
+    }
+    function showSearchResultMessage(session, searchText, searchRegex, nowSearching) {
+      var msg = 'obj.message';
       var notFoundMessageTemplate = getMessageTemplate('_plugin_search2_msg_result_notfound',
         'No page which contains $1 has been found.');
       var foundMessageTemplate = getMessageTemplate('_plugin_search2_msg_result_found',
@@ -118,29 +228,21 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       var searchTextDecorated = findAndDecorateText(searchText, searchRegex);
       if (searchTextDecorated === null) searchTextDecorated = escapeHTML(searchText);
       var messageTemplate = foundMessageTemplate;
-      if (obj.search_done && session.hit_page_count === 0) {
+      if (!nowSearching && session.hitPageCount === 0) {
         messageTemplate = notFoundMessageTemplate;
       }
       msg = messageTemplate.replace(/\$1|\$2|\$3/g, function(m){
         return {
           '$1': searchTextDecorated,
-          '$2': session.hit_page_count,
-          '$3': session.read_page_count
+          '$2': session.hitPageCount,
+          '$3': session.readPageCount
         }[m];
       });
       setSearchMessage(msg);
-      var progress = ' (read:' + session.read_page_count + ', scanned:' +
-        session.scan_page_count + ', all:' + session.page_count + ')';
-      var e = document.querySelector('#_plugin_search2_msg_searching');
-      var msg = e && e.value || 'Searching...';
-      setSearchStatus(msg + progress);
-      if (obj.search_done) {
-        setTimeout(function(){
-          setSearchStatus('');
-        }, 5000);
-      }
-      var results = obj.results;
+    }
+    function addSearchResult(results, searchText, searchRegex, parentElement, insertTop) {
       var now = new Date();
+      var parentFragment = document.createDocumentFragment();
       results.forEach(function(val, index) {
         var fragment = document.createDocumentFragment();
         var li = document.createElement('li');
@@ -150,13 +252,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         if (! decoratedName) {
           decoratedName = escapeHTML(val.name);
         }
-        var author = getAuthorHeader(val.body);
-        var updatedAt = '';
-        if (author) {
-          updatedAt = getUpdateTimeFromAuthorInfo(author);
-        } else {
-          updatedAt = val.updated_at;
-        }
+        var updatedAt = val.updatedAt;
         var liHtml = '<a href="' + escapeHTML(href) + '">' + decoratedName + '</a> ' +
           getPassage(now, updatedAt);
         li.innerHTML = liHtml;
@@ -172,32 +268,70 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         div.classList.add('search-result-detail');
         var head = document.createElement('div');
         head.classList.add('search-result-page-summary');
-        head.innerHTML = escapeHTML(getBodySummary(val.body));
+        head.innerHTML = escapeHTML(val.bodySummary);
         div.appendChild(head);
-        var summary = getSummary(val.body, searchRegex);
-        for (var i = 0; i < summary.length; i++) {
+        var summaryInfo = val.hitSummary;
+        for (var i = 0; i < summaryInfo.length; i++) {
           var pre = document.createElement('pre');
-          pre.innerHTML = summary[i].lines.join('\n');
+          pre.innerHTML = decorateFoundBlock(summaryInfo[i], searchRegex);
           div.appendChild(pre);
         }
         fragment.appendChild(div);
-        ul.appendChild(fragment);
+        parentFragment.appendChild(fragment);
       });
-      if (!obj.search_done && obj.next_start_index) {
-        var waitE = document.querySelector('#_search2_search_wait_milliseconds');
-        var interval = minSearchWaitMilliseconds;
-        try {
-          interval = parseInt(waitE.value);
-        } catch (e) {
-          interval = minSearchWaitMilliseconds;
-        }
-        if (interval < minSearchWaitMilliseconds) {
-          interval = minSearchWaitMilliseconds;
-        }
-        setTimeout(function(){
-          doSearch(searchText, session, obj.next_start_index);
-        }, interval);
+      if (insertTop && parentElement.firstChild) {
+        parentElement.insertBefore(parentFragment, parentElement.firstChild);
+      } else {
+        parentElement.appendChild(parentFragment);
       }
+    }
+    function removeCachedResults() {
+      var props = getSiteProps();
+      if (!props || !props.base_uri_pathname) return;
+      var keyPrefix = getSearchCacheKey(props.base_uri_pathname, '');
+      var keyBase = getSearchCacheKeyBase(props.base_uri_pathname);
+      var removeTargets = [];
+      for (var i = 0, n = localStorage.length; i < n; i++) {
+        var key = localStorage.key(i);
+        if (key.substr(0, keyBase.length) === keyBase) {
+          // Search result Cache
+          if (key.substr(0, keyPrefix.length) !== keyPrefix) {
+            removeTargets.push(key);
+          }
+        }
+      }
+      removeTargets.forEach(function(key){
+        localStorage.removeItem(key);
+      });
+    }
+    function showSecondSearchForm() {
+      // Show second search form
+      var div = document.querySelector('._plugin_search2_second_form');
+      if (div) {
+        div.style.display = 'block';
+      }
+    }
+    /**
+     * Decorate found block (for pre innerHTML)
+     *
+     * @param block
+     * @param searchRegex
+     */
+    function decorateFoundBlock(block, searchRegex) {
+      var lines = [];
+      for (var j = 0; j < block.lines.length; j++) {
+        var line = block.lines[j];
+        var decorated = findAndDecorateText(line, searchRegex);
+        if (decorated === null) {
+          lines.push('' + (block.startIndex + j + 1) + ':\t' + escapeHTML(line));
+        } else {
+          lines.push('' + (block.startIndex + j + 1) + ':\t' + decorated);
+        }
+      }
+      if (block.beyondLimit) {
+        lines.push('...');
+      }
+      return lines.join('\n');
     }
     function prepareKanaMap() {
       if (kanaMap !== null) return;
@@ -295,7 +429,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       }
       return '';
     }
-    function getTargetLines(body, searchRegex) {
+    function getSummaryInfo(body, searchRegex) {
       var lines = body.split('\n');
       var found = [];
       var foundLines = [];
@@ -304,6 +438,7 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       var lastAddedLineIndex = lastFoundLineIndex;
       var blocks = [];
       var lineCount = 0;
+      var currentBlock = null;
       for (var index = 0, length = lines.length; index < length; index++) {
         var line = lines[index];
         if (isInAuthorHeader) {
@@ -318,10 +453,10 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
             isInAuthorHeader = false;
           }
         }
-        var decorated = findAndDecorateText(line, searchRegex);
-        if (decorated === null) {
+        var match = line.match(searchRegex);
+        if (!match) {
           if (index < lastFoundLineIndex + aroundLines + 1) {
-            foundLines.push('' + (index + 1) + ':\t' + escapeHTML(lines[index]));
+            foundLines.push(lines[index]);
             lineCount++;
             lastAddedLineIndex = index;
           }
@@ -334,26 +469,24 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
               foundLineIndex: index,
               lines: []
             };
+            currentBlock = block;
             foundLines = block.lines;
             blocks.push(block);
           }
           if (lineCount >= maxResultLines) {
-            foundLines.push('...');
+            currentBlock.beyondLimit = true;
             return blocks;
           }
           for (var i = startIndex; i < index; i++) {
-            foundLines.push('' + (i + 1) + ':\t' + escapeHTML(lines[i]));
+            foundLines.push(lines[i]);
             lineCount++;
           }
-          foundLines.push('' + (index + 1) + ':\t' + decorated);
+          foundLines.push(line);
           lineCount++;
           lastFoundLineIndex = lastAddedLineIndex = index;
         }
       }
       return blocks;
-    }
-    function getSummary(bodyText, searchRegex) {
-      return getTargetLines(bodyText, searchRegex);
     }
     function hookSearch2(e) {
       var form = document.querySelector('form');
@@ -419,12 +552,23 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         var e = document.querySelector('#_plugin_search2_msg_searching');
         var msg = e && e.value || 'Searching...';
         setSearchStatus(msg);
-        var base = '';
-        forEach(form.querySelectorAll('input[name="base"]'), function(radio){
-          if (radio.checked) base = radio.value;
-        });
-        doSearch(searchText.value, {base: base}, 0);
+        var base = getSearchBase(form);
+        var prevSession = showCachedResult(searchText.value, base);
+        if (prevSession) {
+          doSearch(searchText.value, prevSession, 0, null, prevSession.searchStartTime);
+        } else {
+          doSearch(searchText.value, {base: base}, 0, null);
+        }
+        removeCachedResults();
       }
+    }
+    function getSearchBase(form) {
+      var f = form || document.querySelector('._plugin_search2_form');
+      var base = '';
+      forEach(f.querySelectorAll('input[name="base"]'), function(radio){
+        if (radio.checked) base = radio.value;
+      });
+      return base;
     }
     function setSearchStatus(statusText) {
       var statusList = document.querySelectorAll('._plugin_search2_search_status');
@@ -496,6 +640,20 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
               f.word.value = newText;
             }
           }
+        } else if (f.cmd && f.cmd.value === 'search2') {
+          f.addEventListener('submit', function(){
+            var newSearchText = f.q.value;
+            var prevSearchText = f.q.getAttribute('data-original-q');
+            if (newSearchText === prevSearchText) {
+              // Clear resultCache to search same text again
+              var props = getSiteProps();
+              var cacheKey = getSearchCacheKey(props.base_uri_pathname,
+                prevSearchText);
+              if (window.localStorage) {
+                localStorage.removeItem(cacheKey);
+              }
+            }
+          });
         }
       });
     }

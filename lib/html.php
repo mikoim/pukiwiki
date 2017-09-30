@@ -221,7 +221,7 @@ EOS;
 		'is_utf8' => $is_utf8,
 		'json_enabled' => $json_enabled,
 		'base_uri_pathname' => get_base_uri(PKWK_URI_ROOT),
-		'base_uri_absolute' => get_base_uri(PKWK_URI_ABSOLUTE)
+		'base_uri_absolute' => get_base_uri(PKWK_URI_ABSOLUTE),
 	);
 	$props_json = htmlsc(json_encode($props, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 	$site_props = <<<EOS
