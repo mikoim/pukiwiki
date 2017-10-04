@@ -648,6 +648,9 @@ input#_plugin_search2_detail:checked ~ ul > div.search-result-detail {
 input#_plugin_search2_detail ~ ul > div.search-result-detail {
 	display: none;
 }
+._plugin_search2_search_status {
+	min-height: 1.5em;
+}
 .search-result-page-summary {
 	font-size: 70%;
 	color: gray;

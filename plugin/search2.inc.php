@@ -249,7 +249,7 @@ EOD;
 	$_search2_search_wait_milliseconds = PLUGIN_SEARCH2_SEARCH_WAIT_MILLISECONDS;
 	$result_page_panel =<<<EOD
 <input type="checkbox" id="_plugin_search2_detail" checked><label for="_plugin_search2_detail">$_search_detail</label>
-<ul id="result-list">
+<ul id="_plugin_search2_result-list">
 </ul>
 EOD;
 	if ($h_search_text == '' || $search2_form_total_count > 1) {
