@@ -286,13 +286,6 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         var liHtml = '<a href="' + escapeHTML(href) + '">' + decoratedName + '</a> ' +
           getPassage(now, updatedAt);
         li.innerHTML = liHtml;
-        var a = li.querySelector('a');
-        if (a && a.hash) {
-          if (a.hash !== hash) {
-            // Some browser execute encodeHTML(hash) automatically. Support them.
-            a.href = val.url + '#encq=' + encodeSearchTextForHash(searchText);
-          }
-        }
         li.setAttribute('data-pagename', val.name);
         fragment.appendChild(li);
         var div = document.createElement('div');
@@ -724,7 +717,6 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
       return null;
     }
     function getSearchTextInLocationHash() {
-      // TODO Cross browser
       var hash = location.hash;
       if (!hash) return '';
       var q = '';
@@ -732,6 +724,10 @@ window.addEventListener && window.addEventListener('DOMContentLoaded', function(
         q = hash.substr(3).replace(/\+/g, ' ');
       } else if (hash.substr(0, 6) === '#encq=') {
         q = decodeURIComponent(hash.substr(6).replace(/\+/g, ' '));
+      }
+      var decodedQ = decodeURIComponent(q);
+      if (q !== decodedQ) {
+        q = decodedQ + ' OR ' + q;
       }
       return q;
     }
