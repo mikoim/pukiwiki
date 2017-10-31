@@ -112,16 +112,20 @@ function plugin_ls2_show_lists($prefix, & $params)
 	} else {
 		$params['result'] = $params['saved'] = array();
 		foreach ($pages as $page)
-			plugin_ls2_get_headings($page, $params, 1);
+			$read_pages = array(); // read pages per page
+			plugin_ls2_get_headings($page, $params, 1, false, $read_pages);
 		return join("\n", $params['result']) . join("\n", $params['saved']);
 	}
 }
 
 function plugin_ls2_get_headings($page, & $params, $level, $include = FALSE,
-	&$read_pages = array())
+	&$read_pages)
 {
 	static $_ls2_anchor = 0;
 
+	if (is_null($read_pages)) {
+		$read_pages = array();
+	}
 	// ページが未表示のとき
 	$is_done = isset($read_pages[$page]);
 	if (! $is_done) $params["page_$page"] = ++$_ls2_anchor;
