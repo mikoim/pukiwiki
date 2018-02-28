@@ -798,7 +798,7 @@ class Tracker_list
 	}
 	function __construct($page,$refer,&$config,$list,&$cache_holder)
 	{
-		global $whatsdeleted;
+		global $whatsdeleted, $_cached_page_filetime;
 		$this->page = $page;
 		$this->config = &$config;
 		$this->list = $list;
@@ -976,6 +976,7 @@ class Tracker_list
 			}
 			$this->link_pages = $new_link_pages;
 			$this->link_update_required = $link_update_required;
+			$_cached_page_filetime = $new_link_map;
 		}
 	}
 	function decode_cached_rows($decoded_rows)
