@@ -610,6 +610,20 @@ span.new5 {
   font-size:xx-small;
 }
 
+/* comment.inc.php */
+._p_comment_name {
+  width: 9em;
+}
+._p_comment_msg {
+  width: 38em;
+}
+
+@media (max-width:767px) {
+  ._p_comment_msg {
+    width: 90%;
+  }
+}
+
 /* popular.inc.php */
 span.counter {
   font-size:70%;
