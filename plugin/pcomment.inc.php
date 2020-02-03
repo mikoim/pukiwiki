@@ -1,7 +1,7 @@
 <?php
 // PukiWiki - Yet another WikiWikiWeb clone
 // pcomment.inc.php
-// Copyright 2002-2017 PukiWiki Development Team
+// Copyright 2002-2020 PukiWiki Development Team
 // License: GPL v2 or (at your option) any later version
 //
 // pcomment plugin - Show/Insert comments into specified (another) page
@@ -121,12 +121,15 @@ function plugin_pcomment_convert()
 			$name = '';
 		} else {
 			$title = $_pcmt_messages['btn_name'];
-			$name = '<input type="text" name="name" size="' . PLUGIN_PCOMMENT_SIZE_NAME . '" />';
+			$name = '<input type="text" name="name" size="' . \
+			. PLUGIN_PCOMMENT_SIZE_NAME
+			. '" class="_p_comment_name" />';
 		}
 
 		$radio   = $params['reply'] ?
 			'<input type="radio" name="reply" value="0" tabindex="0" checked="checked" />' : '';
-		$comment = '<input type="text" name="msg" size="' . PLUGIN_PCOMMENT_SIZE_MSG . '" />';
+		$comment = '<input type="text" name="msg" size="'
+		. PLUGIN_PCOMMENT_SIZE_MSG . '" class="_p_comment_msg" />';
 
 		$s_page   = htmlsc($page);
 		$s_refer  = htmlsc($vars_page);
