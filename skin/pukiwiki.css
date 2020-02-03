@@ -353,9 +353,9 @@ div#navigator {
   margin:0;
 }
 
-td.menubar {
-  width:9em;
-  vertical-align:top;
+div#contents {
+  display:flex;
+  flex-flow:row nowrap;
 }
 
 div#menubar {
@@ -365,6 +365,8 @@ div#menubar {
   word-break:break-all;
   font-size:90%;
   overflow:hidden;
+  order:1;
+  flex-grow:0;
 }
 div#menubar ul {
   margin:0 0 0 .5em;
@@ -380,7 +382,24 @@ div#menubar h4 {
 div#body {
   padding:0;
   margin:0 0 0 .5em;
+  order:2;
+  flex-grow:1;
 }
+
+@media (max-width:767px) {
+  div#contents {
+    flex-flow:column wrap;
+  }
+  div#menubar {
+    width:auto;
+    font-size:100%;
+    order:2;
+  }
+  div#body {
+    order:1;
+  }
+}
+
 div#note {
   clear:both;
   padding:0;
@@ -664,7 +683,6 @@ tr.bugtrack_state_undef td {
   img#logo,
   div#navigator,
   div#menubar,
-  td.menubar,
   div#related,
   div#attach,
   div#toolbar {
