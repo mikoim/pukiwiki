@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone
 // comment.inc.php
 // Copyright
-//   2002-2017 PukiWiki Development Team
+//   2002-2020 PukiWiki Development Team
 //   2001-2002 Originally written by yu-ji
 // License: GPL v2 or (at your option) any later version
 //
@@ -109,7 +109,7 @@ function plugin_comment_convert()
 			$_btn_name . '</label>' .
 			'<input type="text" name="name" id="_p_comment_name_' .
 			$comment_no .  '" size="' . PLUGIN_COMMENT_SIZE_NAME .
-			'" />' . "\n";
+			'" class="_p_comment_name" />' . "\n";
 	}
 	$nodate = in_array('nodate', $options) ? '1' : '0';
 	$above  = in_array('above',  $options) ? '1' :
@@ -128,7 +128,8 @@ function plugin_comment_convert()
   <input type="hidden" name="above"  value="$above" />
   <input type="hidden" name="digest" value="$digest" />
   $nametags
-  <input type="text"   name="msg" id="_p_comment_comment_{$comment_no}" size="$comment_cols" />
+  <input type="text" name="msg" id="_p_comment_comment_{$comment_no}"
+   class="_p_comment_msg" size="$comment_cols" />
   <input type="submit" name="comment" value="$_btn_comment" />
  </div>
 </form>

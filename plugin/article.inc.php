@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone
 // article.inc.php
 // Copyright
-//   2002-2017 PukiWiki Development Team
+//   2002-2020 PukiWiki Development Team
 //   2002      Originally written by OKAWARA,Satoshi <kawara@dml.co.jp>
 //             http://www.dml.co.jp/~kawara/pukiwiki/pukiwiki.php
 // License: GPL v2 or (at your option) any later version
@@ -170,10 +170,13 @@ function plugin_article_convert()
   <input type="hidden" name="digest" value="$s_digest" />
   <input type="hidden" name="refer" value="$s_page" />
   <label for="_p_article_name_$article_no">$_btn_name</label>
-  <input type="text" name="name" id="_p_article_name_$article_no" size="$name_cols" /><br />
+  <input type="text" name="name" id="_p_article_name_$article_no"
+   size="$name_cols" class="_p_article_name" /><br />
   <label for="_p_article_subject_$article_no">$_btn_subject</label>
-  <input type="text" name="subject" id="_p_article_subject_$article_no" size="$subject_cols" /><br />
-  <textarea name="msg" rows="$article_rows" cols="$article_cols">\n</textarea><br />
+  <input type="text" name="subject" id="_p_article_subject_$article_no"
+   size="$subject_cols" class="_p_article_subject" /><br />
+  <textarea name="msg" rows="$article_rows" cols="$article_cols"
+   class="_p_article_msg">\n</textarea><br />
   <input type="submit" name="article" value="$_btn_article" />
  </div>
 </form>
