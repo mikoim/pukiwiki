@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone.
 // bugtrack.inc.php
 // Copyright
-//   2002-2017 PukiWiki Development Team
+//   2002-2020 PukiWiki Development Team
 //   2002 Y.MASUI GPL2  http://masui.net/pukiwiki/ masui@masui.net
 //
 // BugTrack plugin
@@ -114,7 +114,7 @@ function plugin_bugtrack_print_form($base, $category)
 	$s_body     = htmlsc($_plugin_bugtrack['body']);
 	$s_submit   = htmlsc($_plugin_bugtrack['submit']);
 	$body = <<<EOD
-<form action="$script" method="post">
+<form action="$script" method="post" class="_p_bugtrack_form">
  <table border="0">
   <tr>
    <th><label for="_p_bugtrack_name_$id">$s_name</label></th>
@@ -144,11 +144,13 @@ function plugin_bugtrack_print_form($base, $category)
   </tr>
   <tr>
    <th><label for="_p_bugtrack_summary_$id">$s_summary</label></th>
-   <td><input  id="_p_bugtrack_summary_$id" name="summary" size="60" type="text" /></td>
+   <td><input  id="_p_bugtrack_summary_$id" name="summary" size="60"
+    class="_p_bugtrack_form_summary" type="text" /></td>
   </tr>
   <tr>
    <th><label   for="_p_bugtrack_body_$id">$s_body</label></th>
-   <td><textarea id="_p_bugtrack_body_$id" name="body" cols="60" rows="6"></textarea></td>
+   <td><textarea id="_p_bugtrack_body_$id" name="body" cols="60" rows="6"
+    class="_p_bugtrack_form_body"></textarea></td>
   </tr>
   <tr>
    <td colspan="2" align="center">
