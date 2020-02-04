@@ -154,12 +154,14 @@ function _navigator($key, $value = '', $javascript = ''){
 
 <?php echo $hr ?>
 
+<?php if ($menu !== FALSE) { ?>
 <div id="contents">
  <div id="body"><?php echo $body ?></div>
-<?php if ($menu !== FALSE) { ?>
  <div id="menubar"><?php echo $menu ?></div>
-<?php } ?>
 </div>
+<?php } else { ?>
+<div id="body"><?php echo $body ?></div>
+<?php } ?>
 
 <?php if ($notes != '') { ?>
 <div id="note"><?php echo $notes ?></div>
