@@ -404,6 +404,10 @@ div#body {
   div#body {
     order:1;
   }
+  div#body img {
+    max-width:95%;
+    height:auto;
+  }
 }
 
 div#note {
