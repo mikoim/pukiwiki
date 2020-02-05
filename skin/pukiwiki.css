@@ -703,6 +703,14 @@ tr.bugtrack_state_undef td {
   background-color:#ff3333;
 }
 
+@media (max-width:767px) {
+  table._p_bugtrack_form th,td {
+    display:block;
+    text-align:left;
+    margin-left:2%;
+  }
+}
+
 /* search2.inc.php  */
 .search-result-page-summary {
   font-size:70%;

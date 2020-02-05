@@ -115,7 +115,7 @@ function plugin_bugtrack_print_form($base, $category)
 	$s_submit   = htmlsc($_plugin_bugtrack['submit']);
 	$body = <<<EOD
 <form action="$script" method="post">
- <table border="0">
+ <table border="0" class="_p_bugtrack_form">
   <tr>
    <th><label for="_p_bugtrack_name_$id">$s_name</label></th>
    <td><input  id="_p_bugtrack_name_$id" name="name" size="20" type="text" /></td>
