@@ -399,6 +399,7 @@ div#menubar h4 {
 div#body {
   padding:0;
   margin:0 0 0 .5em;
+  word-break:break-all;
   order:2;
   flex-grow:1;
 }
