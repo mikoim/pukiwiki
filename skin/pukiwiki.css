@@ -400,6 +400,7 @@ div#body {
   padding:0;
   margin:0 0 0 .5em;
   word-break:break-all;
+  max-width:98%;
   order:2;
   flex-grow:1;
 }
