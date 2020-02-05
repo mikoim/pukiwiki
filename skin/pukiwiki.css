@@ -388,6 +388,7 @@ div#menubar h4 {
 div#body {
   padding:0;
   margin:0 0 0 .5em;
+  max-width:98%;
   order:2;
   flex-grow:1;
 }
