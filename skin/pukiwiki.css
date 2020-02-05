@@ -24,6 +24,11 @@ body,td {
   font-size:90%;
   font-family:verdana, arial, helvetica, Sans-Serif;
 }
+@media (max-width:767px) {
+  body,td {
+    font-size:100%;
+  }
+}
 
 a:link {
   color:#215dc6;
@@ -374,6 +379,12 @@ div#menubar {
   order:1;
   flex-grow:0;
 }
+@media (max-width:767px) {
+  div#menubar {
+    font-size:100%;
+  }
+}
+
 div#menubar ul {
   margin:0 0 0 .5em;
   padding:0 0 0 .5em;
