@@ -170,10 +170,10 @@ function plugin_article_convert()
   <input type="hidden" name="digest" value="$s_digest" />
   <input type="hidden" name="refer" value="$s_page" />
   <label for="_p_article_name_$article_no">$_btn_name</label>
-  <input type="text" name="name" id="_p_article_name_$article_no" size="$name_cols" /><br />
+  <input type="text" name="name" id="_p_article_name_$article_no" class="_p_article_name" /><br />
   <label for="_p_article_subject_$article_no">$_btn_subject</label>
-  <input type="text" name="subject" id="_p_article_subject_$article_no" size="$subject_cols" /><br />
-  <textarea name="msg" rows="$article_rows" cols="$article_cols">\n</textarea><br />
+  <input type="text" name="subject" id="_p_article_subject_$article_no" class="_p_article_subject" /><br />
+  <textarea name="msg" class="_p_article_msg">\n</textarea><br />
   <input type="submit" name="article" value="$_btn_article" />
  </div>
 </form>
