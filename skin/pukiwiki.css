@@ -348,6 +348,7 @@ strong.word9 {
 div#header {
   padding:0;
   margin:0;
+  word-break:break-all;
 }
 
 div#navigator {
