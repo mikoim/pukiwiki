@@ -614,15 +614,15 @@ span.new5 {
 
 /* comment.inc.php */
 ._p_comment_name {
-  width: 9em;
+  width:9em;
 }
 ._p_comment_msg {
-  width: 38em;
+  width:38em;
 }
 
 @media (max-width:767px) {
   ._p_comment_msg {
-    width: 90%;
+    width:90%;
   }
 }
 
