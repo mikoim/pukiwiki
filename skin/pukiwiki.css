@@ -621,6 +621,27 @@ span.new5 {
   max-width:90%;
 }
 
+/* article.inc.php */
+._p_article_name {
+  width:15em;
+}
+._p_article_subject {
+  width:35em;
+}
+._p_article_msg {
+  width:38em;
+  height:5em;
+}
+
+@media (max-width:767px) {
+  ._p_article_subject {
+    width:82%;
+  }
+  ._p_article_msg {
+    width:90%;
+  }
+}
+
 /* popular.inc.php */
 span.counter {
   font-size:70%;
