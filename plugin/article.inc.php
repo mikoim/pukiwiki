@@ -2,7 +2,7 @@
 // PukiWiki - Yet another WikiWikiWeb clone
 // article.inc.php
 // Copyright
-//   2002-2017 PukiWiki Development Team
+//   2002-2020 PukiWiki Development Team
 //   2002      Originally written by OKAWARA,Satoshi <kawara@dml.co.jp>
 //             http://www.dml.co.jp/~kawara/pukiwiki/pukiwiki.php
 // License: GPL v2 or (at your option) any later version
