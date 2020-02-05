@@ -24,10 +24,6 @@
 
  */
 
-define('PLUGIN_ARTICLE_COLS',	70); // テキストエリアのカラム数
-define('PLUGIN_ARTICLE_ROWS',	 5); // テキストエリアの行数
-define('PLUGIN_ARTICLE_NAME_COLS',	24); // 名前テキストエリアのカラム数
-define('PLUGIN_ARTICLE_SUBJECT_COLS',	60); // 題名テキストエリアのカラム数
 define('PLUGIN_ARTICLE_NAME_FORMAT',	'[[$name]]'); // 名前の挿入フォーマット
 define('PLUGIN_ARTICLE_SUBJECT_FORMAT',	'**$subject'); // 題名の挿入フォーマット
 
