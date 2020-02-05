@@ -345,7 +345,7 @@ strong.word9 {
 .edit_form {
   clear:both;
 }
-.edit_form textarea {
+.edit_form textarea,.edit_form select {
   width:95%;
 }
 
