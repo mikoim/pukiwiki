@@ -702,12 +702,25 @@ tr.bugtrack_state_cancel td {
 tr.bugtrack_state_undef td {
   background-color:#ff3333;
 }
+._p_bugtrack_form_summary {
+  width:35em;
+}
+._p_bugtrack_form_body {
+  width:35em;
+}
 
 @media (max-width:767px) {
-  table._p_bugtrack_form th,td {
+  table._p_bugtrack_form th,table._p_bugtrack_form td {
     display:block;
     text-align:left;
     margin-left:2%;
+  }
+  ._p_bugtrack_form_summary {
+    width:95%;
+  }
+  ._p_bugtrack_form_body {
+    width:95%;
+    height:6em;
   }
 }
 
