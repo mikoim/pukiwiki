@@ -24,6 +24,10 @@ body,td {
   font-size:90%;
   font-family:verdana, arial, helvetica, Sans-Serif;
 }
+textarea {
+  box-sizing:border-box;
+  max-width:100%;
+}
 
 a:link {
   color:#215dc6;
