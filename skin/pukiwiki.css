@@ -415,6 +415,7 @@ div#note {
   clear:both;
   padding:0;
   margin:0;
+  word-break:break-all;
 }
 div#attach {
   clear:both;
