@@ -736,8 +736,12 @@ tr.bugtrack_state_undef td {
     margin-right:1%;
   }
   ._p_tracker_form td input[type=text] {
+    box-sizing:border-box;
     max-width:100%;
-    box-sizing: border-box;
+    width:99.5%;
+  }
+  ._p_tracker_form td textarea {
+    width:99.5%;
   }
   ._p_bugtrack_form_summary {
     width:95%;
