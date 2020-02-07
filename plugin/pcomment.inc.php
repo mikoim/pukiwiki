@@ -121,7 +121,7 @@ function plugin_pcomment_convert()
 			$name = '';
 		} else {
 			$title = $_pcmt_messages['btn_name'];
-			$name = '<input type="text" name="name" size="' . \
+			$name = '<input type="text" name="name" size="'
 			. PLUGIN_PCOMMENT_SIZE_NAME
 			. '" class="_p_comment_name" />';
 		}
