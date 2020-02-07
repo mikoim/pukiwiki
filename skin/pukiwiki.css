@@ -720,7 +720,7 @@ tr.bugtrack_state_undef td {
   width:35em;
 }
 ._p_tracker_form th {
-  min-width: 5em;
+  min-width:5em;
 }
 @media (max-width:767px) {
   table._p_bugtrack_form th,table._p_bugtrack_form td {
@@ -731,6 +731,7 @@ tr.bugtrack_state_undef td {
   ._p_tracker_form th,._p_tracker_form td {
     display:block;
     text-align:left !important;
+    width:auto !important;
     margin-left:1%;
     margin-right:1%;
   }
