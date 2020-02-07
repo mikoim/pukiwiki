@@ -76,7 +76,7 @@ function plugin_tracker_convert()
 		$retval = str_replace("[$name]",$replace,$retval);
 	}
 	return <<<EOD
-<form enctype="multipart/form-data" action="$script" method="post">
+<form enctype="multipart/form-data" action="$script" method="post" class="_p_tracker_form">
 <div>
 $retval
 $hiddens
