@@ -736,8 +736,7 @@ tr.bugtrack_state_undef td {
     display:block;
     text-align:left !important;
     width:auto !important;
-    margin-left:1%;
-    margin-right:1%;
+    margin:0;
   }
   ._p_tracker_form td input[type=text] {
     box-sizing:border-box;
