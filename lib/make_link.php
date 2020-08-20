@@ -114,10 +114,19 @@ class InlineConverter
 
 	function convert($string, $page)
 	{
+		static $utf8u; // 'u'(PCRE_UTF8) or ''
+		if (! isset($utf8u)) {
+			if (version_compare('7.0.0', PHP_VERSION, '<=')
+				&& defined('PKWK_UTF8_ENABLE')) {
+				$utf8u = 'u';
+			} else {
+				$utf8u = '';
+			}
+		}
 		$this->page   = $page;
 		$this->result = array();
 
-		$string = preg_replace_callback('/' . $this->pattern . '/x',
+		$string = preg_replace_callback('/' . $this->pattern . '/x' . $utf8u,
 			array(& $this, 'replace'), $string);
 
 		$arr = explode("\x08", make_line_rules(htmlsc($string)));
@@ -140,8 +149,18 @@ class InlineConverter
 
 	function get_objects($string, $page)
 	{
+		static $utf8u; // 'u'(PCRE_UTF8) or ''
+		if (! isset($utf8u)) {
+			if (version_compare('7.0.0', PHP_VERSION, '<=')
+				&& defined('PKWK_UTF8_ENABLE')) {
+				$utf8u = 'u';
+			} else {
+				$utf8u = '';
+			}
+		}
 		$matches = $arr = array();
-		preg_match_all('/' . $this->pattern . '/x', $string, $matches, PREG_SET_ORDER);
+		preg_match_all('/' . $this->pattern . '/x' . $utf8u,
+			$string, $matches, PREG_SET_ORDER);
 		foreach ($matches as $match) {
 			$obj = $this->get_converter($match);
 			if ($obj->set($match, $page) !== FALSE) {
@@ -277,11 +296,20 @@ EOD;
 
 	function set($arr, $page)
 	{
+		static $utf8u; // 'u'(PCRE_UTF8) or ''
+		if (! isset($utf8u)) {
+			if (version_compare('7.0.0', PHP_VERSION, '<=')
+				&& defined('PKWK_UTF8_ENABLE')) {
+				$utf8u = 'u';
+			} else {
+				$utf8u = '';
+			}
+		}
 		list($all, $this->plain, $name, $this->param, $body) = $this->splice($arr);
 
 		// Re-get true plugin name and patameters (for PHP 4.1.2)
 		$matches = array();
-		if (preg_match('/^' . $this->pattern . '/x', $all, $matches)
+		if (preg_match('/^' . $this->pattern . '/x' . $utf8u, $all, $matches)
 			&& $matches[1] != $this->plain) 
 			list(, $this->plain, $name, $this->param) = $matches;
 
